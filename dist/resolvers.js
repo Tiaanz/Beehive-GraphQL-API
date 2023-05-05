@@ -2,7 +2,12 @@ import { prisma } from './db.js';
 export const resolvers = {
     Query: {
         getAllUsers: async () => {
-            return await prisma.user.findMany();
+            return await prisma.user.findMany({
+                include: {
+                    center: true,
+                    jobs: true
+                },
+            });
         },
     },
     Mutation: {
