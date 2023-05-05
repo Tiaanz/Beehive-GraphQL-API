@@ -5,6 +5,11 @@ export const typeDefs = gql`
     getAllUsers: [User!]!
   }
 
+  enum Role {
+    RELIEVER
+    MANAGER
+  }
+
   type Mutation {
     addUser(
       first_name: String!
@@ -12,9 +17,10 @@ export const typeDefs = gql`
       phone: String!
       email: String!
       ECE_id: Int
-      role: String!
-      password:String!
+      role: Role!
+      password: String!
     ): User
+    deleteUser(email:String!):User
   }
 
   type User {

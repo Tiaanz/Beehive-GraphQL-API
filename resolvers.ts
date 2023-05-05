@@ -23,5 +23,13 @@ export const resolvers = {
       })
       return user
     },
+    deleteUser:async (_:any,{email}) => {
+     const deleteUser= await prisma.user.delete({
+        where: {
+          email:email
+        }
+      })
+      return deleteUser
+    }
   },
 }
