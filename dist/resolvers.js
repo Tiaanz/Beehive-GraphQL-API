@@ -1,16 +1,27 @@
 import { prisma } from './db.js';
 export const resolvers = {
     Query: {
+        //fetch all users
         getAllUsers: async () => {
             return await prisma.user.findMany({
                 include: {
                     center: true,
-                    jobs: true
+                    jobs: true,
+                },
+            });
+        },
+        //fetch all centers
+        getAllCenters: async () => {
+            return await prisma.center.findMany({
+                include: {
+                    manager: true,
+                    posts: true,
                 },
             });
         },
     },
     Mutation: {
+        //create a user
         addUser: async (_, args) => {
             const user = await prisma.user.create({
                 data: {
@@ -20,18 +31,19 @@ export const resolvers = {
                     email: args.email,
                     password: args.password,
                     role: args.role,
-                    ECE_id: args.ECE_id
+                    ECE_id: args.ECE_id,
                 },
             });
             return user;
         },
+        //delete a user
         deleteUser: async (_, { email }) => {
             const deleteUser = await prisma.user.delete({
                 where: {
-                    email: email
-                }
+                    email: email,
+                },
             });
             return deleteUser;
-        }
+        },
     },
 };
