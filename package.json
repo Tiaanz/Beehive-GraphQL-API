@@ -1,0 +1,26 @@
+{
+  "name": "beehive-graphql-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type":"module",
+  "scripts": {
+   "compile":"npx tsc",
+   "start":"npm run compile && node ./dist/index.js"   
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@apollo/server": "^4.7.0",
+    "@prisma/client": "^4.13.0",
+    "graphql": "^16.6.0",
+    "graphql-tag": "^2.12.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.3",
+    "prisma": "^4.13.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  }
+}
