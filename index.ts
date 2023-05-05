@@ -7,6 +7,7 @@ import { resolvers } from './resolvers.js'
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    introspection: true,
   })
 
   const { url } = await startStandaloneServer(server, {
