@@ -20,6 +20,8 @@ export const typeDefs = gql`
       ECE_id: Int
       role: Role!
       password: String!
+      bio:String
+      photo_url:String
     ): User
     deleteUser(email:String!):User
   }
@@ -33,6 +35,8 @@ export const typeDefs = gql`
     role: String!
     jobs: [Job]
     center: Center
+    bio:String
+    photo_url:String
   }
 
   type Center {

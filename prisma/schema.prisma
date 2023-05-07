@@ -15,6 +15,8 @@ model User {
   phone      String
   email      String  @unique
   password   String
+  bio        String?
+  photo_url  String?
   role       Role
   jobs       Job[]
   ECE_id     Int?    @unique

@@ -5,8 +5,8 @@ import { resolvers } from './resolvers.js'
 import { AuthenticationError } from './utils/errors.js'
 // import { config } from 'dotenv'
 // config();
-  
-(async function () {
+
+;(async function () {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -27,5 +27,5 @@ import { AuthenticationError } from './utils/errors.js'
     listen: { port: process.env.PORT ? parseInt(process.env.PORT, 10) : 4000 },
   })
 
-  console.log('server is ready at' + url)
+  console.log('server is ready at' + ' ' + url)
 })()
