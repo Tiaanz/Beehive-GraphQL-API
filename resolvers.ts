@@ -1,10 +1,14 @@
 import { prisma } from './db.js'
 import { addUserInput } from './model.js'
+import { AuthenticationError } from './utils/errors.js'
 
 export const resolvers = {
   Query: {
     //fetch all users
-    getAllUsers: async () => {
+    getAllUsers: async (_: any, __: any, { userId, userRole }) => {
+      if (!userId) {
+        throw AuthenticationError
+      }
       return await prisma.user.findMany({
         include: {
           center: true,
@@ -13,7 +17,10 @@ export const resolvers = {
       })
     },
     //fetch all centers
-    getAllCenters: async () => {
+    getAllCenters: async (_: any, __: any, { userId, userRole }) => {
+      if (!userId) {
+        throw AuthenticationError
+      }
       return await prisma.center.findMany({
         include: {
           manager: true,
