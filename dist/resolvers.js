@@ -3,10 +3,10 @@ import { AuthenticationError } from './utils/errors.js';
 export const resolvers = {
     Query: {
         //fetch all users
-        getAllUsers: async (_, __, { userId, userRole }) => {
-            if (!userId) {
-                throw AuthenticationError;
-            }
+        getAllUsers: async (_, __) => {
+            // if (!userId) {
+            //   throw AuthenticationError
+            // }
             return await prisma.user.findMany({
                 include: {
                     center: true,
@@ -15,10 +15,11 @@ export const resolvers = {
             });
         },
         //fetch all centers
-        getAllCenters: async (_, __, { userId, userRole }) => {
+        getAllCenters: async (_, __, { userId }) => {
             if (!userId) {
                 throw AuthenticationError;
             }
+            console.log(userId);
             return await prisma.center.findMany({
                 include: {
                     manager: true,
