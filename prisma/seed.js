@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcrypt'
+
 const prisma = new PrismaClient()
 
 import data from './center.json.js'
@@ -8,6 +10,8 @@ async function main() {
   // await prisma.center.createMany({
   //   data: centerData,
   // })
+
+  const hashedPwd=await bcrypt.hash('1234abcd',10)
   await prisma.user.createMany({
     data: [
       {
@@ -15,7 +19,7 @@ async function main() {
         last_name: 'test',
         email:'test_user@beehive.com',
         phone: '020000001',
-        password: '1234abcd',
+        password: hashedPwd,
         role: 'RELIEVER',
       },
       {
@@ -23,7 +27,7 @@ async function main() {
         last_name: 'test',
         email:'test_manager@beehive.com',
         phone: '020000002',
-        password: '1234abcd',
+        password: hashedPwd,
         role: 'MANAGER',
         ECE_id:40312
       },

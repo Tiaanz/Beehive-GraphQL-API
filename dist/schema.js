@@ -3,6 +3,7 @@ export const typeDefs = gql `
   type Query {
     getAllUsers: [User!]!
     getAllCenters:[Center!]!
+    getFilteredCenters(input:String!):[Center!]!
     getOneUser(email:String!):User
   }
 
@@ -32,6 +33,7 @@ export const typeDefs = gql `
     last_name: String!
     phone: String!
     email: String!
+    password:String!
     role: String!
     jobs: [Job]
     center: Center

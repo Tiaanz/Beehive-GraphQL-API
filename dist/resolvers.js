@@ -25,14 +25,29 @@ export const resolvers = {
                 },
             });
         },
+        //fetch filtered centers
+        getFilteredCenters: async (_, { input }) => {
+            console.log(input);
+            return await prisma.center.findMany({
+                // select: {
+                //  name:input
+                // }
+                where: {
+                    name: {
+                        contains: input,
+                        mode: 'insensitive'
+                    }
+                }
+            });
+        },
         //fetch one user
         getOneUser: async (_, { email }) => {
             return await prisma.user.findUnique({
                 where: {
-                    email: email
-                }
+                    email: email,
+                },
             });
-        }
+        },
     },
     Mutation: {
         //create a user

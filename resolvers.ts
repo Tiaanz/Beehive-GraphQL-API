@@ -5,7 +5,7 @@ import { AuthenticationError } from './utils/errors.js'
 export const resolvers = {
   Query: {
     //fetch all users
-    getAllUsers: async (_: any, __: any, ) => {
+    getAllUsers: async (_: any, __: any) => {
       // if (!userId) {
       //   throw AuthenticationError
       // }
@@ -17,7 +17,7 @@ export const resolvers = {
       })
     },
     //fetch all centers
-    getAllCenters: async (_: any, __: any,) => {
+    getAllCenters: async (_: any, __: any) => {
       // if (!userId) {
       //   throw AuthenticationError
       // }
@@ -28,14 +28,32 @@ export const resolvers = {
         },
       })
     },
+    //fetch filtered centers
+    getFilteredCenters: async (_: any, { input }) => {
+      console.log(input);
+      
+      return await prisma.center.findMany({
+        // select: {
+        //  name:input
+        // }
+        where: {
+          name: {
+            contains: input,
+            mode:'insensitive'
+          }
+        }
+        
+        
+      })
+    },
     //fetch one user
-    getOneUser:async (_: any, { email }) => {
+    getOneUser: async (_: any, { email }) => {
       return await prisma.user.findUnique({
         where: {
-         email:email
-       }
+          email: email,
+        },
       })
-    }
+    },
   },
 
   Mutation: {
