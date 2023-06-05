@@ -4,6 +4,7 @@ export const typeDefs = gql`
   type Query {
     getAllUsers: [User!]!
     getAllCenters:[Center!]!
+    getOneUser(email:String!):User
   }
 
   enum Role {
