@@ -2,6 +2,20 @@ import { prisma } from './db.js'
 import { addUserInput } from './model.js'
 import { AuthenticationError } from './utils/errors.js'
 import bcrypt from 'bcrypt'
+import { z } from 'zod'
+
+const createUserSchema = z.object({
+  first_name: z.string().max(40),
+  last_name: z.string().max(40),
+  phone: z.string().min(8).max(11),
+  email: z.string().email(),
+  password: z
+    .string()
+    .min(8)
+    .regex(/^(?=.*[A-Za-z])(?=.*\d).*$/, {
+      message: 'Password must contain at least one letter and one number',
+    }),
+})
 
 export const resolvers = {
   Query: {
@@ -23,8 +37,7 @@ export const resolvers = {
       // }
       return await prisma.manager.findMany({
         include: {
-          center:true,
-         
+          center: true,
         },
       })
     },
@@ -43,17 +56,13 @@ export const resolvers = {
     },
     //fetch filtered centers
     getFilteredCenters: async (_: any, { input }) => {
-
-      
       return await prisma.center.findMany({
         where: {
           name: {
             contains: input,
-            mode:'insensitive'
-          }
-        }
-        
-        
+            mode: 'insensitive',
+          },
+        },
       })
     },
     //fetch one reliever
@@ -77,37 +86,52 @@ export const resolvers = {
   Mutation: {
     //create a reliever
     addReliever: async (_: any, args: addUserInput) => {
-
-      const hashedPwd = await bcrypt.hash(args.password, 10)
+      try {
+        const validatedData = createUserSchema.parse(args)
+        const { first_name, last_name, phone, email, password } = validatedData
+        const hashedPwd = await bcrypt.hash(password, 10)
 
         const reliever = await prisma.reliever.create({
           data: {
-            first_name: args.first_name,
-            last_name: args.last_name,
-            phone: args.phone,
-            email: args.email,
+            first_name,
+            last_name,
+            phone,
+            email,
             password: hashedPwd,
-            role: args.role,
+            role: "RELIEVER",
           },
         })
         return reliever
+      } catch (error) {
+        console.error('Validation error:', error)
+        throw new Error('Invalid input data')
+      }
     },
     //create a manager
     addManager: async (_: any, args: addUserInput) => {
 
-      const hashedPwd = await bcrypt.hash(args.password, 10)
+      try {
+
+        const validatedData = createUserSchema.parse(args)
+        const { first_name, last_name, phone, email, password } = validatedData
+        const hashedPwd = await bcrypt.hash(password, 10)
         const manager = await prisma.manager.create({
           data: {
-            first_name: args.first_name,
-            last_name: args.last_name,
-            phone: args.phone,
-            email: args.email,
+            first_name,
+            last_name,
+            phone,
+            email,
             password: hashedPwd,
-            role: args.role,
-            ECE_id:args.ECE_id
+            role: "MANAGER",
+            ECE_id: args.ECE_id,
           },
         })
         return manager
+      } catch (error) {
+        console.error('Validation error:', error)
+        throw new Error('Invalid input data')
+      }
+     
     },
 
     //delete a reliever
@@ -119,15 +143,14 @@ export const resolvers = {
       })
       return deleteReliever
     },
-   //delete a manager
-   deleteManager: async (_: any, { email }) => {
-    const deleteManager = await prisma.manager.delete({
-      where: {
-        email: email,
-      },
-    })
-    return deleteManager
-  },
-
+    //delete a manager
+    deleteManager: async (_: any, { email }) => {
+      const deleteManager = await prisma.manager.delete({
+        where: {
+          email: email,
+        },
+      })
+      return deleteManager
+    },
   },
 }

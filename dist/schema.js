@@ -20,7 +20,6 @@ export const typeDefs = gql `
       last_name: String!
       phone: String!
       email: String!
-      role: Role!
       password: String!
       bio: String
       photo_url: String
@@ -32,7 +31,6 @@ export const typeDefs = gql `
       phone: String!
       email: String!
       ECE_id: Int!
-      role: Role!
       password: String!
     ): Manager
     deleteManager(email: String): Manager
