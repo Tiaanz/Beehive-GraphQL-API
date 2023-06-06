@@ -8,7 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Reliever {
   id         String  @id @default(auto()) @map("_id") @db.ObjectId
   first_name String
   last_name  String
@@ -19,16 +19,28 @@ model User {
   photo_url  String?
   role       Role
   jobs       Job[]
-  ECE_id     Int?    @unique
+}
+
+model Manager {
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  first_name String
+  last_name  String
+  phone      String
+  email      String  @unique
+  password   String
+  role       Role
+  ECE_id     Int    @unique
   center     Center?
 }
 
 model Center {
   id      String @id @default(auto()) @map("_id") @db.ObjectId
   ECE_id  Int    @unique
-  manager User?  @relation(fields: [ECE_id], references: [ECE_id])
+  manager Manager?  @relation(fields: [ECE_id], references: [ECE_id])
   name    String
   address String
+  bio String?
+  photo_url String?
   posts   Job[]
 }
 
@@ -39,7 +51,7 @@ model Job {
   date        String
   time        String
   unqualified Boolean @default(true)
-  reliever    User?   @relation(fields: [reliever_id], references: [id])
+  reliever    Reliever?   @relation(fields: [reliever_id], references: [id])
   reliever_id String? @db.ObjectId
   status      Status  @default(OPEN)
 }

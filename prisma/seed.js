@@ -12,7 +12,7 @@ async function main() {
   // })
 
   const hashedPwd=await bcrypt.hash('1234abcd',10)
-  await prisma.user.createMany({
+  await prisma.reliever.createMany({
     data: [
       {
         first_name: 'testUser',
@@ -22,6 +22,10 @@ async function main() {
         password: hashedPwd,
         role: 'RELIEVER',
       },
+    ],
+  })
+  await prisma.manager.createMany({
+    data: [
       {
         first_name: 'testManager',
         last_name: 'test',

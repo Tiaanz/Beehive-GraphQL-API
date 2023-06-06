@@ -1,15 +1,26 @@
 import { prisma } from './db.js';
+import bcrypt from 'bcrypt';
 export const resolvers = {
     Query: {
-        //fetch all users
-        getAllUsers: async (_, __) => {
+        //fetch all relievers
+        getAllRelievers: async (_, __) => {
             // if (!userId) {
             //   throw AuthenticationError
             // }
-            return await prisma.user.findMany({
+            return await prisma.reliever.findMany({
+                include: {
+                    jobs: true,
+                },
+            });
+        },
+        //fetch all managers
+        getAllManagers: async (_, __) => {
+            // if (!userId) {
+            //   throw AuthenticationError
+            // }
+            return await prisma.manager.findMany({
                 include: {
                     center: true,
-                    jobs: true,
                 },
             });
         },
@@ -27,11 +38,7 @@ export const resolvers = {
         },
         //fetch filtered centers
         getFilteredCenters: async (_, { input }) => {
-            console.log(input);
             return await prisma.center.findMany({
-                // select: {
-                //  name:input
-                // }
                 where: {
                     name: {
                         contains: input,
@@ -40,9 +47,17 @@ export const resolvers = {
                 }
             });
         },
-        //fetch one user
-        getOneUser: async (_, { email }) => {
-            return await prisma.user.findUnique({
+        //fetch one reliever
+        getOneReliever: async (_, { email }) => {
+            return await prisma.reliever.findUnique({
+                where: {
+                    email: email,
+                },
+            });
+        },
+        //fetch one manager
+        getOneManager: async (_, { email }) => {
+            return await prisma.manager.findUnique({
                 where: {
                     email: email,
                 },
@@ -50,29 +65,54 @@ export const resolvers = {
         },
     },
     Mutation: {
-        //create a user
-        addUser: async (_, args) => {
-            const user = await prisma.user.create({
+        //create a reliever
+        addReliever: async (_, args) => {
+            const hashedPwd = await bcrypt.hash(args.password, 10);
+            const reliever = await prisma.reliever.create({
                 data: {
                     first_name: args.first_name,
                     last_name: args.last_name,
                     phone: args.phone,
                     email: args.email,
-                    password: args.password,
+                    password: hashedPwd,
                     role: args.role,
-                    ECE_id: args.ECE_id,
                 },
             });
-            return user;
+            return reliever;
         },
-        //delete a user
-        deleteUser: async (_, { email }) => {
-            const deleteUser = await prisma.user.delete({
+        //create a manager
+        addManager: async (_, args) => {
+            const hashedPwd = await bcrypt.hash(args.password, 10);
+            const manager = await prisma.manager.create({
+                data: {
+                    first_name: args.first_name,
+                    last_name: args.last_name,
+                    phone: args.phone,
+                    email: args.email,
+                    password: hashedPwd,
+                    role: args.role,
+                    ECE_id: args.ECE_id
+                },
+            });
+            return manager;
+        },
+        //delete a reliever
+        deleteReliever: async (_, { email }) => {
+            const deleteReliever = await prisma.reliever.delete({
                 where: {
                     email: email,
                 },
             });
-            return deleteUser;
+            return deleteReliever;
+        },
+        //delete a manager
+        deleteManager: async (_, { email }) => {
+            const deleteManager = await prisma.manager.delete({
+                where: {
+                    email: email,
+                },
+            });
+            return deleteManager;
         },
     },
 };

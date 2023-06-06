@@ -1,21 +1,34 @@
 import { prisma } from './db.js'
 import { addUserInput } from './model.js'
 import { AuthenticationError } from './utils/errors.js'
+import bcrypt from 'bcrypt'
 
 export const resolvers = {
   Query: {
-    //fetch all users
-    getAllUsers: async (_: any, __: any) => {
+    //fetch all relievers
+    getAllRelievers: async (_: any, __: any) => {
       // if (!userId) {
       //   throw AuthenticationError
       // }
-      return await prisma.user.findMany({
+      return await prisma.reliever.findMany({
         include: {
-          center: true,
           jobs: true,
         },
       })
     },
+    //fetch all managers
+    getAllManagers: async (_: any, __: any) => {
+      // if (!userId) {
+      //   throw AuthenticationError
+      // }
+      return await prisma.manager.findMany({
+        include: {
+          center:true,
+         
+        },
+      })
+    },
+
     //fetch all centers
     getAllCenters: async (_: any, __: any) => {
       // if (!userId) {
@@ -43,9 +56,17 @@ export const resolvers = {
         
       })
     },
-    //fetch one user
-    getOneUser: async (_: any, { email }) => {
-      return await prisma.user.findUnique({
+    //fetch one reliever
+    getOneReliever: async (_: any, { email }) => {
+      return await prisma.reliever.findUnique({
+        where: {
+          email: email,
+        },
+      })
+    },
+    //fetch one manager
+    getOneManager: async (_: any, { email }) => {
+      return await prisma.manager.findUnique({
         where: {
           email: email,
         },
@@ -54,29 +75,59 @@ export const resolvers = {
   },
 
   Mutation: {
-    //create a user
-    addUser: async (_: any, args: addUserInput) => {
-      const user = await prisma.user.create({
-        data: {
-          first_name: args.first_name,
-          last_name: args.last_name,
-          phone: args.phone,
-          email: args.email,
-          password: args.password,
-          role: args.role,
-          ECE_id: args.ECE_id,
-        },
-      })
-      return user
+    //create a reliever
+    addReliever: async (_: any, args: addUserInput) => {
+
+      const hashedPwd = await bcrypt.hash(args.password, 10)
+
+        const reliever = await prisma.reliever.create({
+          data: {
+            first_name: args.first_name,
+            last_name: args.last_name,
+            phone: args.phone,
+            email: args.email,
+            password: hashedPwd,
+            role: args.role,
+          },
+        })
+        return reliever
     },
-    //delete a user
-    deleteUser: async (_: any, { email }) => {
-      const deleteUser = await prisma.user.delete({
+    //create a manager
+    addManager: async (_: any, args: addUserInput) => {
+
+      const hashedPwd = await bcrypt.hash(args.password, 10)
+        const manager = await prisma.manager.create({
+          data: {
+            first_name: args.first_name,
+            last_name: args.last_name,
+            phone: args.phone,
+            email: args.email,
+            password: hashedPwd,
+            role: args.role,
+            ECE_id:args.ECE_id
+          },
+        })
+        return manager
+    },
+
+    //delete a reliever
+    deleteReliever: async (_: any, { email }) => {
+      const deleteReliever = await prisma.reliever.delete({
         where: {
           email: email,
         },
       })
-      return deleteUser
+      return deleteReliever
     },
+   //delete a manager
+   deleteManager: async (_: any, { email }) => {
+    const deleteManager = await prisma.manager.delete({
+      where: {
+        email: email,
+      },
+    })
+    return deleteManager
+  },
+
   },
 }

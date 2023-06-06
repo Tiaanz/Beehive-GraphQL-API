@@ -1,10 +1,12 @@
 import { gql } from 'graphql-tag';
 export const typeDefs = gql `
   type Query {
-    getAllUsers: [User!]!
-    getAllCenters:[Center!]!
-    getFilteredCenters(input:String!):[Center!]!
-    getOneUser(email:String!):User
+    getAllRelievers: [Reliever!]!
+    getAllManagers: [Manager!]!
+    getAllCenters: [Center!]!
+    getFilteredCenters(input: String!): [Center!]!
+    getOneReliever(email: String!): Reliever
+    getOneManager(email: String!): Manager
   }
 
   enum Role {
@@ -13,40 +15,62 @@ export const typeDefs = gql `
   }
 
   type Mutation {
-    addUser(
+    addReliever(
       first_name: String!
       last_name: String!
       phone: String!
       email: String!
-      ECE_id: Int
       role: Role!
       password: String!
-      bio:String
-      photo_url:String
-    ): User
-    deleteUser(email:String!):User
+      bio: String
+      photo_url: String
+    ): Reliever
+    deleteReliever(email: String!): Reliever
+    addManager(
+      first_name: String!
+      last_name: String!
+      phone: String!
+      email: String!
+      ECE_id: Int!
+      role: Role!
+      password: String!
+    ): Manager
+    deleteManager(email: String): Manager
   }
 
-  type User {
+  type Reliever {
     id: String!
     first_name: String!
     last_name: String!
     phone: String!
     email: String!
-    password:String!
+    password: String!
     role: String!
     jobs: [Job]
+    bio: String
+    photo_url: String
+  }
+
+  type Manager {
+    id: String!
+    first_name: String!
+    last_name: String!
+    phone: String!
+    email: String!
+    password: String!
+    role: String!
+    ECE_id: Int!
     center: Center
-    bio:String
-    photo_url:String
   }
 
   type Center {
     id: String!
     ECE_id: Int!
-    manager: User
+    manager: Manager
     name: String!
     address: String!
+    bio: String
+    photo_url: String
     posts: [Job]
   }
 
@@ -56,7 +80,7 @@ export const typeDefs = gql `
     date: String!
     time: String!
     unqualified: Boolean!
-    reliever: User
+    reliever: Reliever
     status: String
   }
 `;
