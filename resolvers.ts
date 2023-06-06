@@ -30,12 +30,9 @@ export const resolvers = {
     },
     //fetch filtered centers
     getFilteredCenters: async (_: any, { input }) => {
-      console.log(input);
+
       
       return await prisma.center.findMany({
-        // select: {
-        //  name:input
-        // }
         where: {
           name: {
             contains: input,
