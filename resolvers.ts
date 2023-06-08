@@ -104,8 +104,10 @@ export const resolvers = {
         })
         return reliever
       } catch (error) {
-        console.error('Validation error:', error)
-        throw new Error('Invalid input data')
+        if (error.message.includes("Reliever_email_key")) {
+          throw new Error('This email has been registered.')
+          
+        }
       }
     },
     //create a manager
