@@ -5,10 +5,11 @@ const createUserSchema = z.object({
     first_name: z.string().max(40),
     last_name: z.string().max(40),
     phone: z.string().min(8).max(11),
-    email: z.string().email(),
+    email: z.string().email().max(40),
     password: z
         .string()
         .min(8)
+        .max(16)
         .regex(/^(?=.*[A-Za-z])(?=.*\d).*$/, {
         message: 'Password must contain at least one letter and one number',
     }),
@@ -121,8 +122,14 @@ export const resolvers = {
                 return manager;
             }
             catch (error) {
-                console.error('Validation error:', error);
-                throw new Error('Invalid input data');
+                if (error.message.includes("Manager_email_key")) {
+                    throw new Error('This email has been registered.');
+                }
+                if (error.message.includes('Manager_ECE_id_key')) {
+                    throw new Error('This centre has a manager registered.');
+                }
+                // console.log('Validation error:', error.message)
+                // throw new Error('Invalid input data')
             }
         },
         //delete a reliever
