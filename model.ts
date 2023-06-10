@@ -9,3 +9,9 @@ export interface addUserInput {
   ECE_id?: number
 }
 
+export interface updateUserInput {
+  bio?: string
+  email: string
+  photo_url?:string
+}
+

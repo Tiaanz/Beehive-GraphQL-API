@@ -1,5 +1,5 @@
 import { prisma } from './db.js'
-import { addUserInput } from './model.js'
+import { addUserInput, updateUserInput } from './model.js'
 import { AuthenticationError } from './utils/errors.js'
 import bcrypt from 'bcrypt'
 import { z } from 'zod'
@@ -16,6 +16,12 @@ const createUserSchema = z.object({
     .regex(/^(?=.*[A-Za-z])(?=.*\d).*$/, {
       message: 'Password must contain at least one letter and one number',
     }),
+})
+
+const updateUserSchema = z.object({
+  email: z.string().email().max(40),
+  bio: z.string().max(1000).optional(),
+  photo_url:z.string().optional()
 })
 
 export const resolvers = {
@@ -99,22 +105,38 @@ export const resolvers = {
             phone,
             email,
             password: hashedPwd,
-            role: "RELIEVER",
+            role: 'RELIEVER',
           },
         })
         return reliever
       } catch (error) {
-        if (error.message.includes("Reliever_email_key")) {
+        if (error.message.includes('Reliever_email_key')) {
           throw new Error('This email has been registered.')
-          
         }
+      }
+    },
+    //update reliever
+    updateReliever: async (_: any, args: updateUserInput) => {
+      try {
+        const validatedData = updateUserSchema.parse(args)
+        const { bio, email,photo_url } = validatedData
+
+        const reliever = await prisma.reliever.update({
+          where: { email: email },
+          data: {
+            bio: bio,
+            photo_url:photo_url
+          },
+        })
+        return reliever
+      } catch (error) {
+      throw new Error('Bio must contain at most 1000 characters.')
+      
       }
     },
     //create a manager
     addManager: async (_: any, args: addUserInput) => {
-
       try {
-
         const validatedData = createUserSchema.parse(args)
         const { first_name, last_name, phone, email, password } = validatedData
         const hashedPwd = await bcrypt.hash(password, 10)
@@ -125,22 +147,20 @@ export const resolvers = {
             phone,
             email,
             password: hashedPwd,
-            role: "MANAGER",
+            role: 'MANAGER',
             ECE_id: args.ECE_id,
           },
         })
-      
+
         return manager
       } catch (error) {
-        if (error.message.includes("Manager_email_key")) {
+        if (error.message.includes('Manager_email_key')) {
           throw new Error('This email has been registered.')
-          
         }
         if (error.message.includes('Manager_ECE_id_key')) {
           throw new Error('This centre has a manager registered.')
         }
       }
-     
     },
 
     //delete a reliever

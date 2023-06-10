@@ -24,6 +24,7 @@ export const typeDefs = gql `
       bio: String
       photo_url: String
     ): Reliever
+    updateReliever(bio: String, email: String!,photo_url:String): Reliever
     deleteReliever(email: String!): Reliever
     addManager(
       first_name: String!
