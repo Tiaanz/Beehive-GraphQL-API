@@ -20,3 +20,10 @@ export interface updateCenterInput{
   description?: string
   photo_url?:string
 }
+
+export interface addPostInput{
+  center_id: number
+  date: string
+  time: string
+  qualified:boolean
+}

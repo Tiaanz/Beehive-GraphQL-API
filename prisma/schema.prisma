@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -29,31 +28,31 @@ model Manager {
   email      String  @unique
   password   String
   role       Role
-  ECE_id     Int    @unique
+  ECE_id     Int     @unique
   center     Center?
 }
 
 model Center {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  ECE_id  Int    @unique
-  manager Manager?  @relation(fields: [ECE_id], references: [ECE_id])
-  name    String
-  address String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  ECE_id      Int      @unique
+  manager     Manager? @relation(fields: [ECE_id], references: [ECE_id])
+  name        String
+  address     String
   description String?
-  photo_url String?
-  posts   Job[]
+  photo_url   String?
+  posts       Job[]
 }
 
 model Job {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  center      Center  @relation(fields: [center_id], references: [ECE_id])
-  center_id   Int     @unique
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  center      Center    @relation(fields: [center_id], references: [ECE_id])
+  center_id   Int       @unique
   date        String
   time        String
-  unqualified Boolean @default(true)
-  reliever    Reliever?   @relation(fields: [reliever_id], references: [id])
-  reliever_id String? @db.ObjectId
-  status      Status  @default(OPEN)
+  qualified   Boolean   @default(true)
+  reliever    Reliever? @relation(fields: [reliever_id], references: [id])
+  reliever_id String?   @db.ObjectId
+  status      Status    @default(OPEN)
 }
 
 enum Status {

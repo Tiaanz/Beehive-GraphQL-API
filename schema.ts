@@ -38,6 +38,12 @@ export const typeDefs = gql`
     ): Manager
     deleteManager(email: String): Manager
     updateCenter(ECE_id:Int!,description:String,photo_url:String):Center
+    addPost(
+    center_id:Int!
+    date:String!
+    time:String!
+    qualified:Boolean!
+    ):Job
   }
 
   type Reliever {
@@ -79,10 +85,11 @@ export const typeDefs = gql`
   type Job {
     id: String!
     center: Center!
+    center_id:Int!
     date: String!
     time: String!
-    unqualified: Boolean!
+    qualified: Boolean!
     reliever: Reliever
-    status: String
+    status: String!
   }
 `

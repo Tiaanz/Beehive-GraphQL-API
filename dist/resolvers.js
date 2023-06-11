@@ -1,28 +1,6 @@
 import { prisma } from './db.js';
 import bcrypt from 'bcrypt';
-import { z } from 'zod';
-const createUserSchema = z.object({
-    first_name: z.string().max(40),
-    last_name: z.string().max(40),
-    phone: z.string().min(8).max(11),
-    email: z.string().email().max(40),
-    password: z
-        .string()
-        .min(8)
-        .max(16)
-        .regex(/^(?=.*[A-Za-z])(?=.*\d).*$/, {
-        message: 'Password must contain at least one letter and one number',
-    }),
-});
-const updateUserSchema = z.object({
-    email: z.string().email().max(40),
-    bio: z.string().max(1000).optional(),
-    photo_url: z.string().optional(),
-});
-const updateCenterSchema = z.object({
-    description: z.string().max(1000).optional(),
-    photo_url: z.string().optional(),
-});
+import { createUserSchema, updateCenterSchema, updateUserSchema, createPostSchema } from './data-validation.js';
 export const resolvers = {
     Query: {
         //fetch all relievers
@@ -187,6 +165,26 @@ export const resolvers = {
                 if (error.message.includes('Manager_ECE_id_key')) {
                     throw new Error('This centre has a manager registered.');
                 }
+            }
+        },
+        //add a post
+        addPost: async (_, args) => {
+            try {
+                const validatedData = createPostSchema.parse(args);
+                const { date, time, qualified } = validatedData;
+                const post = await prisma.job.create({
+                    data: {
+                        center_id: args.center_id,
+                        date,
+                        time,
+                        qualified,
+                        status: "OPEN"
+                    }
+                });
+                return post;
+            }
+            catch (error) {
+                console.log(error.message);
             }
         },
         //delete a reliever
