@@ -1,5 +1,5 @@
 import { prisma } from './db.js'
-import { addUserInput, updateUserInput } from './model.js'
+import { addUserInput, updateUserInput, updateCenterInput } from './model.js'
 import { AuthenticationError } from './utils/errors.js'
 import bcrypt from 'bcrypt'
 import { z } from 'zod'
@@ -21,7 +21,16 @@ const createUserSchema = z.object({
 const updateUserSchema = z.object({
   email: z.string().email().max(40),
   bio: z.string().max(1000).optional(),
-  photo_url:z.string().optional()
+  photo_url: z.string().optional(),
+})
+
+const updateCenterSchema = z.object({
+  ECE_id: z.number().refine((val) => String(val).length === 5, {
+    message: 'ECE_id must have exactly 5 digits',
+
+  }),
+  description: z.string().max(1000).optional(),
+  photo_url: z.string().optional(),
 })
 
 export const resolvers = {
@@ -55,6 +64,20 @@ export const resolvers = {
       //   throw AuthenticationError
       // }
       return await prisma.center.findMany({
+        include: {
+          manager: true,
+          posts: true,
+        },
+      })
+    },
+
+    //get one center
+    getOneCenter: async (_: any, { ECE_id }) => {
+      // if (!userId) {
+      //   throw AuthenticationError
+      // }
+      return await prisma.center.findUnique({
+        where: { ECE_id: ECE_id },
         include: {
           manager: true,
           posts: true,
@@ -119,19 +142,38 @@ export const resolvers = {
     updateReliever: async (_: any, args: updateUserInput) => {
       try {
         const validatedData = updateUserSchema.parse(args)
-        const { bio, email,photo_url } = validatedData
+        const { bio, email, photo_url } = validatedData
 
         const reliever = await prisma.reliever.update({
           where: { email: email },
           data: {
             bio: bio,
-            photo_url:photo_url
+            photo_url: photo_url,
           },
         })
         return reliever
       } catch (error) {
-      throw new Error('Bio must contain at most 1000 characters.')
-      
+        throw new Error('Bio must contain at most 1000 characters.')
+      }
+    },
+    // update a center
+    updateCenter: async (_: any, args: updateCenterInput) => {
+      try {
+
+        const validatedData = updateCenterSchema.parse(args)
+        const { description, photo_url } = validatedData
+
+        const center = await prisma.center.update({
+          where: { ECE_id:args.ECE_id },
+          data: {
+            description,
+            photo_url
+          },
+        })
+        return center
+
+      } catch (error) {
+        throw new Error('Description must contain at most 1000 characters.')
       }
     },
     //create a manager

@@ -39,7 +39,7 @@ model Center {
   manager Manager?  @relation(fields: [ECE_id], references: [ECE_id])
   name    String
   address String
-  bio String?
+  description String?
   photo_url String?
   posts   Job[]
 }

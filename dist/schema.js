@@ -7,6 +7,7 @@ export const typeDefs = gql `
     getFilteredCenters(input: String!): [Center!]!
     getOneReliever(email: String!): Reliever
     getOneManager(email: String!): Manager
+    getOneCenter(ECE_id:Int!):Center
   }
 
   enum Role {
@@ -35,6 +36,7 @@ export const typeDefs = gql `
       password: String!
     ): Manager
     deleteManager(email: String): Manager
+    updateCenter(ECE_id:Int!,description:String,photo_url:String):Center
   }
 
   type Reliever {
@@ -68,7 +70,7 @@ export const typeDefs = gql `
     manager: Manager
     name: String!
     address: String!
-    bio: String
+    description: String
     photo_url: String
     posts: [Job]
   }

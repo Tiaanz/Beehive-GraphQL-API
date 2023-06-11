@@ -15,3 +15,8 @@ export interface updateUserInput {
   photo_url?:string
 }
 
+export interface updateCenterInput{
+  ECE_id:number
+  description?: string
+  photo_url?:string
+}
