@@ -25,10 +25,6 @@ const updateUserSchema = z.object({
 })
 
 const updateCenterSchema = z.object({
-  ECE_id: z.number().refine((val) => String(val).length === 5, {
-    message: 'ECE_id must have exactly 5 digits',
-
-  }),
   description: z.string().max(1000).optional(),
   photo_url: z.string().optional(),
 })
