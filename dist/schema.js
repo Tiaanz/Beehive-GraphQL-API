@@ -8,6 +8,7 @@ export const typeDefs = gql `
     getOneReliever(email: String!): Reliever
     getOneManager(email: String!): Manager
     getOneCenter(ECE_id:Int!):Center
+    getPostsByCenter(center_id:Int!):[Job!]!
   }
 
   enum Role {

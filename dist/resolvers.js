@@ -1,6 +1,6 @@
 import { prisma } from './db.js';
 import bcrypt from 'bcrypt';
-import { createUserSchema, updateCenterSchema, updateUserSchema, createPostSchema } from './data-validation.js';
+import { createUserSchema, updateCenterSchema, updateUserSchema, createPostSchema, } from './data-validation.js';
 export const resolvers = {
     Query: {
         //fetch all relievers
@@ -77,6 +77,18 @@ export const resolvers = {
                 },
             });
         },
+        //fetch posts by center
+        getPostsByCenter: async (_, { center_id }) => {
+            // if (!userId) {
+            //   throw AuthenticationError
+            // }
+            return await prisma.job.findMany({
+                where: { center_id },
+                include: {
+                    reliever: true,
+                },
+            });
+        },
     },
     Mutation: {
         //create a reliever
@@ -130,7 +142,7 @@ export const resolvers = {
                     where: { ECE_id: args.ECE_id },
                     data: {
                         description,
-                        photo_url
+                        photo_url,
                     },
                 });
                 return center;
@@ -179,8 +191,8 @@ export const resolvers = {
                         date_to,
                         time,
                         qualified,
-                        status: "OPEN"
-                    }
+                        status: 'OPEN',
+                    },
                 });
                 return post;
             }

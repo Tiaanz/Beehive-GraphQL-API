@@ -44,16 +44,16 @@ model Center {
 }
 
 model Job {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
-  center      Center    @relation(fields: [center_id], references: [ECE_id])
-  center_id   Int       
-  date_from   String
-  date_to     String
-  time        String
-  qualified   Boolean   @default(true)
-  reliever    Reliever? @relation(fields: [reliever_id], references: [id])
-  reliever_id String?   @db.ObjectId
-  status      Status    @default(OPEN)
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  center         Center    @relation(fields: [center_id], references: [ECE_id])
+  center_id      Int
+  date_from      String
+  date_to        String
+  time           String
+  qualified      Boolean   @default(true)
+  reliever       Reliever? @relation(fields: [reliever_email], references: [email])
+  reliever_email String?
+  status         Status    @default(OPEN)
 }
 
 enum Status {
