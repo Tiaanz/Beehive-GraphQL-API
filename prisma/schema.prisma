@@ -46,8 +46,9 @@ model Center {
 model Job {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   center      Center    @relation(fields: [center_id], references: [ECE_id])
-  center_id   Int       @unique
-  date        String
+  center_id   Int       
+  date_from   String
+  date_to     String
   time        String
   qualified   Boolean   @default(true)
   reliever    Reliever? @relation(fields: [reliever_id], references: [id])

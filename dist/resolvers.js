@@ -171,11 +171,12 @@ export const resolvers = {
         addPost: async (_, args) => {
             try {
                 const validatedData = createPostSchema.parse(args);
-                const { date, time, qualified } = validatedData;
+                const { date_from, date_to, time, qualified } = validatedData;
                 const post = await prisma.job.create({
                     data: {
                         center_id: args.center_id,
-                        date,
+                        date_from,
+                        date_to,
                         time,
                         qualified,
                         status: "OPEN"

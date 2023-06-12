@@ -22,7 +22,8 @@ export const updateCenterSchema = z.object({
     photo_url: z.string().optional(),
 });
 export const createPostSchema = z.object({
-    date: z.string(),
-    time: z.string().max(13),
-    qualified: z.boolean()
+    date_from: z.string(),
+    date_to: z.string(),
+    time: z.string().max(20),
+    qualified: z.boolean(),
 });

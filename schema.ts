@@ -40,7 +40,8 @@ export const typeDefs = gql`
     updateCenter(ECE_id:Int!,description:String,photo_url:String):Center
     addPost(
     center_id:Int!
-    date:String!
+    date_from:String!
+    date_to:String!
     time:String!
     qualified:Boolean!
     ):Job
@@ -86,7 +87,8 @@ export const typeDefs = gql`
     id: String!
     center: Center!
     center_id:Int!
-    date: String!
+    date_from: String!
+    date_to:String!
     time: String!
     qualified: Boolean!
     reliever: Reliever

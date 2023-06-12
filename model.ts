@@ -23,7 +23,8 @@ export interface updateCenterInput{
 
 export interface addPostInput{
   center_id: number
-  date: string
+  date_from: string
+  date_to:string
   time: string
   qualified:boolean
 }
