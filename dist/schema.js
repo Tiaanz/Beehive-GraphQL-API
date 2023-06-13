@@ -34,7 +34,7 @@ export const typeDefs = gql `
       ECE_id: Int!
       password: String!
     ): Manager
-    deleteManager(email: String): Manager
+    deleteManager(email: String!): Manager
     updateCenter(ECE_id:Int!,description:String,photo_url:String):Center
     addPost(
     center_id:Int!
@@ -43,6 +43,7 @@ export const typeDefs = gql `
     time:String!
     qualified:Boolean!
     ):Job
+    applyJob(id:String!,relieverID:String!):Job
   }
 
   type Reliever {

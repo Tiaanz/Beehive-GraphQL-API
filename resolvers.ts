@@ -104,7 +104,7 @@ export const resolvers = {
           date_to: { gte: date_to },
         },
         include: {
-          reliever: true,
+          relievers: true,
           center: true,
         },
       })
@@ -117,10 +117,10 @@ export const resolvers = {
       // }
       return await prisma.job.findMany({
         where: {
-          status:"OPEN"
-          },
+          status: 'OPEN',
+        },
         include: {
-          reliever: true,
+          relievers: true,
           center: true,
         },
       })
@@ -238,6 +238,44 @@ export const resolvers = {
       } catch (error) {
         console.log(error.message)
       }
+    },
+
+    //update a Job by adding an applicant
+    applyJob: async (_: any, { id, relieverID }) => {
+      try {
+        const job = await prisma.job.findUnique({
+          where: {
+            id: id,
+          },
+          select: {
+            relieverIDs: true,
+          },
+        })
+  
+        if (job && !job.relieverIDs.includes(relieverID)) {
+          const updatedJob = await prisma.job.update({
+            where: {
+              id: id,
+            },
+            data: {
+              relieverIDs: {
+                push: relieverID,
+              },
+            },
+          })
+         
+          return updatedJob
+        } else {
+      
+          throw new Error('Duplicate relieverID is not allowed')
+     
+        }
+        
+      } catch (error) {
+        console.log(error.message);
+        
+      }
+      
     },
 
     //delete a reliever
