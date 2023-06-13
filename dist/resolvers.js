@@ -95,13 +95,29 @@ export const resolvers = {
             });
         },
         //fetch "OPEN" jobs
-        getOpenJobs: async (_, { status }) => {
+        getOpenJobs: async (_) => {
             // if (!userId) {
             //   throw AuthenticationError
             // }
             return await prisma.job.findMany({
                 where: {
                     status: 'OPEN',
+                },
+                include: {
+                    relievers: true,
+                    center: true,
+                },
+            });
+        },
+        //fetch jobs reliever applied
+        getJobsByReliever: async (_, { date_from, date_to }) => {
+            // if (!userId) {
+            //   throw AuthenticationError
+            // }
+            return await prisma.job.findMany({
+                where: {
+                    date_from: { lte: date_from },
+                    date_to: { gte: date_to },
                 },
                 include: {
                     relievers: true,
@@ -239,7 +255,9 @@ export const resolvers = {
                         declined_relieverIDs: true,
                     },
                 });
-                if (applied && !applied.relieverIDs.includes(relieverID) && !declined.declined_relieverIDs.includes(relieverID)) {
+                if (applied &&
+                    !applied.relieverIDs.includes(relieverID) &&
+                    !declined.declined_relieverIDs.includes(relieverID)) {
                     const updatedJob = await prisma.job.update({
                         where: {
                             id: id,
@@ -279,7 +297,9 @@ export const resolvers = {
                         relieverIDs: true,
                     },
                 });
-                if (declined && !declined.declined_relieverIDs.includes(relieverID) && !applied.relieverIDs.includes(relieverID)) {
+                if (declined &&
+                    !declined.declined_relieverIDs.includes(relieverID) &&
+                    !applied.relieverIDs.includes(relieverID)) {
                     const updatedJob = await prisma.job.update({
                         where: {
                             id: id,

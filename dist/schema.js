@@ -9,7 +9,8 @@ export const typeDefs = gql `
     getOneManager(email: String!): Manager
     getOneCenter(ECE_id:Int!):Center
     getPostsByCenter(center_id:Int!,date_from:String!,date_to:String!):[Job!]!
-    getOpenJobs(status:String!):[Job!]!
+    getOpenJobs:[Job!]!
+    getJobsByReliever(date_from:String!,date_to:String!):[Job!]!
   }
 
 

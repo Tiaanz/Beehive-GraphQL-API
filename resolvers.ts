@@ -111,13 +111,30 @@ export const resolvers = {
     },
 
     //fetch "OPEN" jobs
-    getOpenJobs: async (_: any, { status }) => {
+    getOpenJobs: async (_: any) => {
       // if (!userId) {
       //   throw AuthenticationError
       // }
       return await prisma.job.findMany({
         where: {
           status: 'OPEN',
+        },
+        include: {
+          relievers: true,
+          center: true,
+        },
+      })
+    },
+
+    //fetch jobs reliever applied
+    getJobsByReliever: async (_: any, { date_from, date_to }) => {
+      // if (!userId) {
+      //   throw AuthenticationError
+      // }
+      return await prisma.job.findMany({
+        where: {
+          date_from: { lte: date_from },
+          date_to: { gte: date_to },
         },
         include: {
           relievers: true,
@@ -218,8 +235,6 @@ export const resolvers = {
       }
     },
 
-    
-
     //add a post
     addPost: async (_: any, args: addPostInput) => {
       try {
@@ -262,8 +277,12 @@ export const resolvers = {
             declined_relieverIDs: true,
           },
         })
-  
-        if (applied && !applied.relieverIDs.includes(relieverID)&& !declined.declined_relieverIDs.includes(relieverID)) {
+
+        if (
+          applied &&
+          !applied.relieverIDs.includes(relieverID) &&
+          !declined.declined_relieverIDs.includes(relieverID)
+        ) {
           const updatedJob = await prisma.job.update({
             where: {
               id: id,
@@ -274,68 +293,61 @@ export const resolvers = {
               },
             },
           })
-         
+
           return updatedJob
         } else {
-      
           throw new Error('You have applied or declined the job.')
-     
         }
-        
       } catch (error) {
-        console.log(error.message);
-        
+        console.log(error.message)
       }
-      
     },
 
+    //When a reliever declines the job
+    declineJob: async (_: any, { id, relieverID }) => {
+      try {
+        const declined = await prisma.job.findUnique({
+          where: {
+            id: id,
+          },
+          select: {
+            declined_relieverIDs: true,
+          },
+        })
 
-        //When a reliever declines the job
-        declineJob: async (_: any, { id, relieverID }) => {
-          try {
-            const declined = await prisma.job.findUnique({
-              where: {
-                id: id,
-              },
-              select: {
-                declined_relieverIDs: true,
-              },
-            })
+        const applied = await prisma.job.findUnique({
+          where: {
+            id: id,
+          },
+          select: {
+            relieverIDs: true,
+          },
+        })
 
-            const applied = await prisma.job.findUnique({
-              where: {
-                id: id,
+        if (
+          declined &&
+          !declined.declined_relieverIDs.includes(relieverID) &&
+          !applied.relieverIDs.includes(relieverID)
+        ) {
+          const updatedJob = await prisma.job.update({
+            where: {
+              id: id,
+            },
+            data: {
+              declined_relieverIDs: {
+                push: relieverID,
               },
-              select: {
-                relieverIDs: true,
-              },
-            })
-      
-            if (declined && !declined.declined_relieverIDs.includes(relieverID) && !applied.relieverIDs.includes(relieverID)) {
-              const updatedJob = await prisma.job.update({
-                where: {
-                  id: id,
-                },
-                data: {
-                  declined_relieverIDs: {
-                    push: relieverID,
-                  },
-                },
-              })
-             
-              return updatedJob
-            } else {
-          
-              throw new Error('You have declined or applied the job.')
-         
-            }
-            
-          } catch (error) {
-            console.log(error.message);
-            
-          }
-          
-        },
+            },
+          })
+
+          return updatedJob
+        } else {
+          throw new Error('You have declined or applied the job.')
+        }
+      } catch (error) {
+        console.log(error.message)
+      }
+    },
 
     //delete a reliever
     deleteReliever: async (_: any, { email }) => {
