@@ -218,6 +218,8 @@ export const resolvers = {
       }
     },
 
+    
+
     //add a post
     addPost: async (_: any, args: addPostInput) => {
       try {
@@ -243,7 +245,7 @@ export const resolvers = {
     //update a Job by adding an applicant
     applyJob: async (_: any, { id, relieverID }) => {
       try {
-        const job = await prisma.job.findUnique({
+        const applied = await prisma.job.findUnique({
           where: {
             id: id,
           },
@@ -251,8 +253,17 @@ export const resolvers = {
             relieverIDs: true,
           },
         })
+
+        const declined = await prisma.job.findUnique({
+          where: {
+            id: id,
+          },
+          select: {
+            declined_relieverIDs: true,
+          },
+        })
   
-        if (job && !job.relieverIDs.includes(relieverID)) {
+        if (applied && !applied.relieverIDs.includes(relieverID)&& !declined.declined_relieverIDs.includes(relieverID)) {
           const updatedJob = await prisma.job.update({
             where: {
               id: id,
@@ -267,7 +278,7 @@ export const resolvers = {
           return updatedJob
         } else {
       
-          throw new Error('Duplicate relieverID is not allowed')
+          throw new Error('You have applied or declined the job.')
      
         }
         
@@ -277,6 +288,54 @@ export const resolvers = {
       }
       
     },
+
+
+        //When a reliever declines the job
+        declineJob: async (_: any, { id, relieverID }) => {
+          try {
+            const declined = await prisma.job.findUnique({
+              where: {
+                id: id,
+              },
+              select: {
+                declined_relieverIDs: true,
+              },
+            })
+
+            const applied = await prisma.job.findUnique({
+              where: {
+                id: id,
+              },
+              select: {
+                relieverIDs: true,
+              },
+            })
+      
+            if (declined && !declined.declined_relieverIDs.includes(relieverID) && !applied.relieverIDs.includes(relieverID)) {
+              const updatedJob = await prisma.job.update({
+                where: {
+                  id: id,
+                },
+                data: {
+                  declined_relieverIDs: {
+                    push: relieverID,
+                  },
+                },
+              })
+             
+              return updatedJob
+            } else {
+          
+              throw new Error('You have declined or applied the job.')
+         
+            }
+            
+          } catch (error) {
+            console.log(error.message);
+            
+          }
+          
+        },
 
     //delete a reliever
     deleteReliever: async (_: any, { email }) => {

@@ -44,6 +44,7 @@ export const typeDefs = gql `
     qualified:Boolean!
     ):Job
     applyJob(id:String!,relieverID:String!):Job
+    declineJob(id:String!,relieverID:String!):Job
   }
 
   type Reliever {
@@ -90,7 +91,9 @@ export const typeDefs = gql `
     date_to:String!
     time: String!
     qualified: Boolean!
-    reliever: Reliever
+    relievers: [Reliever]
+    relieverIDs: [String] 
+    declined_relieverIDs:[String]
     status: String!
   }
 `;
