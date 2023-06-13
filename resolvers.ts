@@ -93,14 +93,35 @@ export const resolvers = {
       })
     },
     //fetch posts by center
-    getPostsByCenter: async (_: any, {center_id }) => {
+    getPostsByCenter: async (_: any, { center_id, date_from, date_to }) => {
       // if (!userId) {
       //   throw AuthenticationError
       // }
       return await prisma.job.findMany({
-        where: { center_id },
+        where: {
+          center_id,
+          date_from: { lte: date_from },
+          date_to: { gte: date_to },
+        },
         include: {
           reliever: true,
+          center: true,
+        },
+      })
+    },
+
+    //fetch "OPEN" jobs
+    getOpenJobs: async (_: any, { status }) => {
+      // if (!userId) {
+      //   throw AuthenticationError
+      // }
+      return await prisma.job.findMany({
+        where: {
+          status:"OPEN"
+          },
+        include: {
+          reliever: true,
+          center: true,
         },
       })
     },
