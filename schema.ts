@@ -8,13 +8,15 @@ export const typeDefs = gql`
     getFilteredCenters(input: String!): [Center!]!
     getOneReliever(email: String!): Reliever
     getOneManager(email: String!): Manager
-    getOneCenter(ECE_id:Int!):Center
-    getPostsByCenter(center_id:Int!,date_from:String!,date_to:String!):[Job!]!
-    getOpenJobs:[Job!]!
-    getJobsByReliever(date_from:String!,date_to:String!):[Job!]!
+    getOneCenter(ECE_id: Int!): Center
+    getPostsByCenter(
+      center_id: Int!
+      date_from: String
+      date_to: String
+    ): [Job!]!
+    getOpenJobs: [Job!]!
+    getJobsByReliever(date_from: String!, date_to: String!): [Job!]!
   }
-
-
 
   type Mutation {
     addReliever(
@@ -25,8 +27,14 @@ export const typeDefs = gql`
       password: String!
       bio: String
       photo_url: String
+      qualified: Boolean!
     ): Reliever
-    updateReliever(bio: String, email: String!,photo_url:String): Reliever
+    updateReliever(
+      bio: String
+      email: String!
+      photo_url: String
+      qualified: Boolean
+    ): Reliever
     deleteReliever(email: String!): Reliever
     addManager(
       first_name: String!
@@ -37,16 +45,16 @@ export const typeDefs = gql`
       password: String!
     ): Manager
     deleteManager(email: String!): Manager
-    updateCenter(ECE_id:Int!,description:String,photo_url:String):Center
+    updateCenter(ECE_id: Int!, description: String, photo_url: String): Center
     addPost(
-    center_id:Int!
-    date_from:String!
-    date_to:String!
-    time:String!
-    qualified:Boolean!
-    ):Job
-    applyJob(id:String!,relieverID:String!):Job
-    declineJob(id:String!,relieverID:String!):Job
+      center_id: Int!
+      date_from: String!
+      date_to: String!
+      time: String!
+      qualified: Boolean!
+    ): Job
+    applyJob(id: String!, relieverID: String!): Job
+    declineJob(id: String!, relieverID: String!): Job
   }
 
   type Reliever {
@@ -56,6 +64,7 @@ export const typeDefs = gql`
     phone: String!
     email: String!
     password: String!
+    qualified: Boolean!
     role: String!
     jobs: [Job]
     bio: String
@@ -88,14 +97,14 @@ export const typeDefs = gql`
   type Job {
     id: String!
     center: Center!
-    center_id:Int!
+    center_id: Int!
     date_from: String!
-    date_to:String!
+    date_to: String!
     time: String!
     qualified: Boolean!
     relievers: [Reliever]
-    relieverIDs: [String] 
-    declined_relieverIDs:[String]
+    relieverIDs: [String]
+    declined_relieverIDs: [String]
     status: String!
   }
 `

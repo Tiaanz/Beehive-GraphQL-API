@@ -151,7 +151,7 @@ export const resolvers = {
         const validatedData = createUserSchema.parse(args)
         const { first_name, last_name, phone, email, password } = validatedData
         const hashedPwd = await bcrypt.hash(password, 10)
-
+     
         const reliever = await prisma.reliever.create({
           data: {
             first_name,
@@ -160,6 +160,7 @@ export const resolvers = {
             email,
             password: hashedPwd,
             role: 'RELIEVER',
+            qualified:args.qualified
           },
         })
         return reliever
@@ -180,6 +181,7 @@ export const resolvers = {
           data: {
             bio: bio,
             photo_url: photo_url,
+            qualified:args.qualified
           },
         })
         return reliever

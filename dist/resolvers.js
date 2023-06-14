@@ -141,6 +141,7 @@ export const resolvers = {
                         email,
                         password: hashedPwd,
                         role: 'RELIEVER',
+                        qualified: args.qualified
                     },
                 });
                 return reliever;
@@ -161,6 +162,7 @@ export const resolvers = {
                     data: {
                         bio: bio,
                         photo_url: photo_url,
+                        qualified: args.qualified
                     },
                 });
                 return reliever;

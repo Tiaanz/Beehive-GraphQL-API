@@ -7,12 +7,14 @@ export interface addUserInput {
   email: string
   password: string
   ECE_id?: number
+  qualified:boolean
 }
 
 export interface updateUserInput {
   bio?: string
   email: string
-  photo_url?:string
+  photo_url?: string
+  qualified?:boolean
 }
 
 export interface updateCenterInput{
