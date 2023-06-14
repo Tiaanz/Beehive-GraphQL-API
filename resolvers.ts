@@ -151,7 +151,7 @@ export const resolvers = {
         const validatedData = createUserSchema.parse(args)
         const { first_name, last_name, phone, email, password } = validatedData
         const hashedPwd = await bcrypt.hash(password, 10)
-     
+
         const reliever = await prisma.reliever.create({
           data: {
             first_name,
@@ -160,7 +160,7 @@ export const resolvers = {
             email,
             password: hashedPwd,
             role: 'RELIEVER',
-            qualified:args.qualified
+            qualified: args.qualified,
           },
         })
         return reliever
@@ -181,7 +181,7 @@ export const resolvers = {
           data: {
             bio: bio,
             photo_url: photo_url,
-            qualified:args.qualified
+            qualified: args.qualified,
           },
         })
         return reliever
@@ -345,6 +345,51 @@ export const resolvers = {
           return updatedJob
         } else {
           throw new Error('You have declined or applied the job.')
+        }
+      } catch (error) {
+        console.log(error.message)
+      }
+    },
+
+    //When a manager accpets a job
+    acceptJob: async (_: any, { id, relieverID }) => {
+      try {
+        const declined = await prisma.job.findUnique({
+          where: {
+            id: id,
+          },
+          select: {
+            declined_relieverIDs: true,
+          },
+        })
+
+        const applied = await prisma.job.findUnique({
+          where: {
+            id: id,
+          },
+          select: {
+            relieverIDs: true,
+          },
+        })
+
+        if (
+          applied &&
+          !declined.declined_relieverIDs.includes(relieverID) &&
+          applied.relieverIDs.includes(relieverID)
+        ) {
+          const updatedJob = await prisma.job.update({
+            where: {
+              id: id,
+            },
+            data: {
+              relieverIDs: relieverID,
+              status:"FUFILLED"
+            },
+          })
+
+          return updatedJob
+        } else {
+          throw new Error('You have not applied for this job.')
         }
       } catch (error) {
         console.log(error.message)

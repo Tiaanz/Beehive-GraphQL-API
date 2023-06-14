@@ -54,6 +54,7 @@ export const typeDefs = gql `
     ): Job
     applyJob(id: String!, relieverID: String!): Job
     declineJob(id: String!, relieverID: String!): Job
+    acceptJob(id:String!,relieverID:String!):Job
   }
 
   type Reliever {
