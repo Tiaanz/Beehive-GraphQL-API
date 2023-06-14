@@ -55,7 +55,8 @@ export const typeDefs = gql`
     ): Job
     applyJob(id: String!, relieverID: String!): Job
     declineJob(id: String!, relieverID: String!): Job
-    acceptJob(id:String!,relieverID:String!):Job
+    acceptJob(id: String!, relieverID: String!): Job
+    getJob(id: String!, jobID: String!): Reliever
   }
 
   type Reliever {
@@ -67,6 +68,7 @@ export const typeDefs = gql`
     password: String!
     qualified: Boolean!
     role: String!
+    jobIDs: [String]
     jobs: [Job]
     bio: String
     photo_url: String

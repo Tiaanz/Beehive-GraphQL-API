@@ -82,6 +82,9 @@ export const resolvers = {
         where: {
           email: email,
         },
+        include: {
+          jobs: true,
+        },
       })
     },
     //fetch one manager
@@ -383,13 +386,49 @@ export const resolvers = {
             },
             data: {
               relieverIDs: relieverID,
-              status:"FUFILLED"
+              status: 'FUFILLED',
             },
           })
 
           return updatedJob
         } else {
           throw new Error('You have not applied for this job.')
+        }
+      } catch (error) {
+        console.log(error.message)
+      }
+    },
+
+    //When a reliever gets a job
+    getJob: async (_: any, { id, jobID }) => {
+      try {
+        const existing = await prisma.reliever.findUnique({
+          where: {
+            id: id,
+          },
+          select: {
+            jobIDs: true,
+          },
+        })
+
+        if (
+          existing &&
+          !existing.jobIDs.includes(jobID) 
+        ) {
+          const updatedReliever = await prisma.reliever.update({
+            where: {
+              id: id,
+            },
+            data: {
+              jobIDs: {
+                push: jobID,
+              },
+            },
+          })
+
+          return updatedReliever
+        } else {
+          throw new Error('You have been confirmed for this job.')
         }
       } catch (error) {
         console.log(error.message)
