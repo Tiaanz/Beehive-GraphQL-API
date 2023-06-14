@@ -1,6 +1,8 @@
 import { prisma } from './db.js';
 import bcrypt from 'bcrypt';
 import { createUserSchema, updateCenterSchema, updateUserSchema, createPostSchema, } from './data-validation.js';
+import dayjs from 'dayjs';
+import { convertDate } from './helper.js';
 export const resolvers = {
     Query: {
         //fetch all relievers
@@ -377,8 +379,21 @@ export const resolvers = {
                         jobIDs: true,
                     },
                 });
-                if (existing &&
-                    !existing.jobIDs.includes(jobID)) {
+                function extractDatesFromArray(arr) {
+                    const dates = [];
+                    for (let i = 0; i < arr.length; i++) {
+                        const dateFromObj = dayjs(convertDate(arr[i].date_from));
+                        const dateToObj = dayjs(convertDate(arr[i].date_to));
+                        let currentDate = dateFromObj;
+                        while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
+                            dates.push(currentDate.format("DD/MM/YYYY"));
+                            currentDate = currentDate.add(1, "day");
+                        }
+                    }
+                    return dates;
+                }
+                //To avoid duplicated jobID being added
+                if (existing && !existing.jobIDs.includes(jobID)) {
                     const updatedReliever = await prisma.reliever.update({
                         where: {
                             id: id,
@@ -389,7 +404,24 @@ export const resolvers = {
                             },
                         },
                     });
-                    return updatedReliever;
+                    const jobs = await prisma.reliever.findMany({
+                        where: {
+                            id: id,
+                        },
+                        select: {
+                            jobs: true,
+                        },
+                    });
+                    const unavailableDates = extractDatesFromArray(jobs[0].jobs);
+                    const updatedReliever2 = await prisma.reliever.update({
+                        where: {
+                            id: id,
+                        },
+                        data: {
+                            not_available_dates: unavailableDates
+                        },
+                    });
+                    return updatedReliever2;
                 }
                 else {
                     throw new Error('You have been confirmed for this job.');

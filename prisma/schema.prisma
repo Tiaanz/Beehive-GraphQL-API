@@ -8,18 +8,19 @@ datasource db {
 }
 
 model Reliever {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  first_name String
-  last_name  String
-  phone      String
-  email      String   @unique
-  password   String
-  qualified  Boolean
-  bio        String?
-  photo_url  String?
-  role       Role
-  jobIDs     String[] @db.ObjectId
-  jobs       Job[]    @relation(fields: [jobIDs], references: [id])
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  first_name          String
+  last_name           String
+  phone               String
+  email               String   @unique
+  password            String
+  qualified           Boolean
+  bio                 String?
+  photo_url           String?
+  role                Role
+  jobIDs              String[] @db.ObjectId
+  jobs                Job[]    @relation(fields: [jobIDs], references: [id])
+  not_available_dates String[]
 }
 
 model Manager {

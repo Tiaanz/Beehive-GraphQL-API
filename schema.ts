@@ -70,6 +70,7 @@ export const typeDefs = gql`
     role: String!
     jobIDs: [String]
     jobs: [Job]
+    not_available_dates: [String]
     bio: String
     photo_url: String
   }
