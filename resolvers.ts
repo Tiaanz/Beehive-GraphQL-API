@@ -16,7 +16,6 @@ import {
 import dayjs from 'dayjs'
 import { convertDate } from './helper.js'
 
-
 export const resolvers = {
   Query: {
     //fetch all relievers
@@ -90,6 +89,19 @@ export const resolvers = {
         },
       })
     },
+
+    //fetch one reliever by ID
+    getRelieverById: async (_: any, { reliever_id }) => {
+      return await prisma.reliever.findUnique({
+        where: {
+          id:reliever_id,
+        },
+        include: {
+          jobs: true,
+        },
+      })
+    },
+
     //fetch one manager
     getOneManager: async (_: any, { email }) => {
       return await prisma.manager.findUnique({
@@ -415,22 +427,25 @@ export const resolvers = {
         })
 
         function extractDatesFromArray(arr: string | any[]) {
-          const dates = [];
-        
+          const dates = []
+
           for (let i = 0; i < arr.length; i++) {
-            const dateFromObj = dayjs(convertDate(arr[i].date_from));
-            const dateToObj = dayjs(convertDate(arr[i].date_to));
-        
-            let currentDate = dateFromObj;
-            while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
-              dates.push(currentDate.format("DD/MM/YYYY"));
-              currentDate = currentDate.add(1, "day");
+            const dateFromObj = dayjs(convertDate(arr[i].date_from))
+            const dateToObj = dayjs(convertDate(arr[i].date_to))
+
+            let currentDate = dateFromObj
+            while (
+              currentDate.isSame(dateToObj) ||
+              currentDate.isBefore(dateToObj)
+            ) {
+              dates.push(currentDate.format('DD/MM/YYYY'))
+              currentDate = currentDate.add(1, 'day')
             }
           }
-        
-          return dates;
+
+          return dates
         }
-        
+
         //To avoid duplicated jobID being added
         if (existing && !existing.jobIDs.includes(jobID)) {
           const updatedReliever = await prisma.reliever.update({
@@ -452,13 +467,13 @@ export const resolvers = {
               jobs: true,
             },
           })
-          const unavailableDates=extractDatesFromArray(jobs[0].jobs)
+          const unavailableDates = extractDatesFromArray(jobs[0].jobs)
           const updatedReliever2 = await prisma.reliever.update({
             where: {
               id: id,
             },
             data: {
-              not_available_dates: unavailableDates
+              not_available_dates: unavailableDates,
             },
           })
           return updatedReliever2

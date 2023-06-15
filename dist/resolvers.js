@@ -74,6 +74,17 @@ export const resolvers = {
                 },
             });
         },
+        //fetch one reliever by ID
+        getRelieverById: async (_, { reliever_id }) => {
+            return await prisma.reliever.findUnique({
+                where: {
+                    id: reliever_id,
+                },
+                include: {
+                    jobs: true,
+                },
+            });
+        },
         //fetch one manager
         getOneManager: async (_, { email }) => {
             return await prisma.manager.findUnique({
@@ -385,9 +396,10 @@ export const resolvers = {
                         const dateFromObj = dayjs(convertDate(arr[i].date_from));
                         const dateToObj = dayjs(convertDate(arr[i].date_to));
                         let currentDate = dateFromObj;
-                        while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
-                            dates.push(currentDate.format("DD/MM/YYYY"));
-                            currentDate = currentDate.add(1, "day");
+                        while (currentDate.isSame(dateToObj) ||
+                            currentDate.isBefore(dateToObj)) {
+                            dates.push(currentDate.format('DD/MM/YYYY'));
+                            currentDate = currentDate.add(1, 'day');
                         }
                     }
                     return dates;
@@ -418,7 +430,7 @@ export const resolvers = {
                             id: id,
                         },
                         data: {
-                            not_available_dates: unavailableDates
+                            not_available_dates: unavailableDates,
                         },
                     });
                     return updatedReliever2;

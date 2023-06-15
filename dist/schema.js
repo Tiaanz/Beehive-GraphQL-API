@@ -6,6 +6,7 @@ export const typeDefs = gql `
     getAllCenters: [Center!]!
     getFilteredCenters(input: String!): [Center!]!
     getOneReliever(email: String!): Reliever
+    getRelieverById(reliever_id:String!):Reliever
     getOneManager(email: String!): Manager
     getOneCenter(ECE_id: Int!): Center
     getPostsByCenter(
