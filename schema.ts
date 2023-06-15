@@ -7,7 +7,7 @@ export const typeDefs = gql`
     getAllCenters: [Center!]!
     getFilteredCenters(input: String!): [Center!]!
     getOneReliever(email: String!): Reliever
-    getRelieverById(reliever_id:String!):Reliever
+    getRelieverById(reliever_id: String!): Reliever
     getOneManager(email: String!): Manager
     getOneCenter(ECE_id: Int!): Center
     getPostsByCenter(
@@ -17,7 +17,7 @@ export const typeDefs = gql`
     ): [Job!]!
     getOpenJobs: [Job!]!
     getJobsByReliever(date_from: String!, date_to: String!): [Job!]!
-    getJobById(job_id:String!):Job
+    getJobById(job_id: String!): Job
   }
 
   type Mutation {
@@ -54,6 +54,14 @@ export const typeDefs = gql`
       date_to: String!
       time: String!
       qualified: Boolean!
+    ): Job
+    updatePost(
+      post_id: String!
+      date_from: String
+      date_to: String
+      time: String
+      qualified: Boolean
+      status: String
     ): Job
     applyJob(id: String!, relieverID: String!): Job
     declineJob(id: String!, relieverID: String!): Job

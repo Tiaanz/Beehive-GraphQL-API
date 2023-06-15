@@ -27,3 +27,10 @@ export const createPostSchema = z.object({
     time: z.string().max(20),
     qualified: z.boolean(),
 });
+export const updatePostSchema = z.object({
+    post_id: z.string(),
+    date_from: z.string().optional(),
+    date_to: z.string().optional(),
+    time: z.string().max(20).optional(),
+    qualified: z.boolean().optional(),
+});

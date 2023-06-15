@@ -4,6 +4,7 @@ import {
   updateUserInput,
   updateCenterInput,
   addPostInput,
+  updatePostInput,
 } from './model.js'
 import { AuthenticationError } from './utils/errors.js'
 import bcrypt from 'bcrypt'
@@ -12,9 +13,11 @@ import {
   updateCenterSchema,
   updateUserSchema,
   createPostSchema,
+  updatePostSchema,
 } from './data-validation.js'
 import dayjs from 'dayjs'
 import { convertDate } from './helper.js'
+import { Status } from '@prisma/client'
 
 export const resolvers = {
   Query: {
@@ -289,6 +292,30 @@ export const resolvers = {
             time,
             qualified,
             status: 'OPEN',
+          },
+        })
+        return post
+      } catch (error) {
+        console.log(error.message)
+      }
+    },
+
+    //update a post
+    updatePost: async (_: any, args: updatePostInput) => {
+      try {
+        const validatedData = updatePostSchema.parse(args)
+        const { date_from, date_to, time, qualified, post_id } = validatedData
+
+        const post = await prisma.job.update({
+          where: {
+            id: post_id,
+          },
+          data: {
+            date_from,
+            date_to,
+            time,
+            qualified,
+            status: args.status as Status,
           },
         })
         return post

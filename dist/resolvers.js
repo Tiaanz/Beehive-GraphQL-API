@@ -1,6 +1,6 @@
 import { prisma } from './db.js';
 import bcrypt from 'bcrypt';
-import { createUserSchema, updateCenterSchema, updateUserSchema, createPostSchema, } from './data-validation.js';
+import { createUserSchema, updateCenterSchema, updateUserSchema, createPostSchema, updatePostSchema, } from './data-validation.js';
 import dayjs from 'dayjs';
 import { convertDate } from './helper.js';
 export const resolvers = {
@@ -148,15 +148,15 @@ export const resolvers = {
             // }
             return await prisma.job.findUnique({
                 where: {
-                    id: job_id
+                    id: job_id,
                 },
                 include: {
                     relievers: true,
                     center: {
                         include: {
-                            manager: true
-                        }
-                    }
+                            manager: true,
+                        },
+                    },
                 },
             });
         },
@@ -265,6 +265,29 @@ export const resolvers = {
                         time,
                         qualified,
                         status: 'OPEN',
+                    },
+                });
+                return post;
+            }
+            catch (error) {
+                console.log(error.message);
+            }
+        },
+        //update a post
+        updatePost: async (_, args) => {
+            try {
+                const validatedData = updatePostSchema.parse(args);
+                const { date_from, date_to, time, qualified, post_id } = validatedData;
+                const post = await prisma.job.update({
+                    where: {
+                        id: post_id,
+                    },
+                    data: {
+                        date_from,
+                        date_to,
+                        time,
+                        qualified,
+                        status: args.status,
                     },
                 });
                 return post;
