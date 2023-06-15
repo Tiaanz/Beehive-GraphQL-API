@@ -94,7 +94,7 @@ export const resolvers = {
     getRelieverById: async (_: any, { reliever_id }) => {
       return await prisma.reliever.findUnique({
         where: {
-          id:reliever_id,
+          id: reliever_id,
         },
         include: {
           jobs: true,
@@ -157,6 +157,26 @@ export const resolvers = {
         include: {
           relievers: true,
           center: true,
+        },
+      })
+    },
+
+    //fetch job by ID
+    getJobById: async (_: any, { job_id }) => {
+      // if (!userId) {
+      //   throw AuthenticationError
+      // }
+      return await prisma.job.findUnique({
+        where: {
+          id: job_id,
+        },
+        include: {
+          relievers: true,
+          center: {
+            include: {
+              manager: true,
+            },
+          },
         },
       })
     },

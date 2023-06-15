@@ -141,6 +141,25 @@ export const resolvers = {
                 },
             });
         },
+        //fetch job by ID
+        getJobById: async (_, { job_id }) => {
+            // if (!userId) {
+            //   throw AuthenticationError
+            // }
+            return await prisma.job.findUnique({
+                where: {
+                    id: job_id
+                },
+                include: {
+                    relievers: true,
+                    center: {
+                        include: {
+                            manager: true
+                        }
+                    }
+                },
+            });
+        },
     },
     Mutation: {
         //create a reliever
