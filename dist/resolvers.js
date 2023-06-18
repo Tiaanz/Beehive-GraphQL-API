@@ -2,15 +2,14 @@ import { prisma } from './db.js';
 import bcrypt from 'bcrypt';
 import { createUserSchema, updateCenterSchema, updateUserSchema, createPostSchema, updatePostSchema, } from './data-validation.js';
 import dayjs from 'dayjs';
-import { convertDate } from './helper.js';
 function extractDatesFromArray(arr) {
     const dates = [];
     for (let i = 0; i < arr.length; i++) {
-        const dateFromObj = dayjs(convertDate(arr[i].date_from));
-        const dateToObj = dayjs(convertDate(arr[i].date_to));
+        const dateFromObj = dayjs(arr[i].date_from);
+        const dateToObj = dayjs(arr[i].date_to);
         let currentDate = dateFromObj;
         while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
-            dates.push(currentDate.format('DD/MM/YYYY'));
+            dates.push(currentDate.format('YYYY/MM/DD'));
             currentDate = currentDate.add(1, 'day');
         }
     }
@@ -171,6 +170,56 @@ export const resolvers = {
                         },
                     },
                 },
+            });
+        },
+        getRelieverIDs: async (_, { relieverID, jobID }) => {
+            // const jobs = await prisma.job.findMany({
+            //   where: {
+            //     relieverIDs: {
+            //       has: relieverID,
+            //     },
+            //   },
+            // })
+            const job = await prisma.job.findUnique({
+                where: {
+                    id: jobID,
+                },
+            });
+            // console.log(job);
+            // const filteredArray = jobs.filter((dateRange) => {
+            //   const dateFrom = dayjs(convertDate(dateRange.date_from))
+            //   const dateTo = dayjs(convertDate(dateRange.date_to))
+            //   const objectDateFrom = dayjs(convertDate(job.date_from))
+            //   const objectDateTo = dayjs(convertDate(job.date_to))
+            //   return (
+            //     (dateFrom.isBefore(objectDateTo) ||
+            //       dateFrom.isSame(objectDateTo)) &&
+            //     (dateTo.isAfter(objectDateFrom) || dateTo.isAfter(objectDateFrom))
+            //   )
+            // })
+            // const updatedRelieverIDs = filteredArray.map((job) =>
+            //   job.relieverIDs.filter((id) => id !== relieverID)
+            // )
+            return await prisma.job.findMany({
+                where: {
+                    id: {
+                        not: {
+                            equals: jobID,
+                        },
+                    },
+                    // date_from: {
+                    //   lte: "2023-07-02",
+                    // },
+                    // date_to: {
+                    //   gte: job.date_from,
+                    // },
+                    relieverIDs: {
+                        has: relieverID,
+                    },
+                },
+                // data: {
+                //   relieverIDs: [],
+                // },
             });
         },
     },
@@ -497,12 +546,12 @@ export const resolvers = {
                     },
                 });
                 const cancelledDates = [];
-                const dateFromObj = dayjs(convertDate(job.date_from));
-                const dateToObj = dayjs(convertDate(job.date_to));
+                const dateFromObj = dayjs(job.date_from);
+                const dateToObj = dayjs(job.date_to);
                 let currentDate = dateFromObj;
                 while (currentDate.isSame(dateToObj) ||
                     currentDate.isBefore(dateToObj)) {
-                    cancelledDates.push(currentDate.format('DD/MM/YYYY'));
+                    cancelledDates.push(currentDate.format('YYYY/MM/DD'));
                     currentDate = currentDate.add(1, 'day');
                 }
                 const reliever = await prisma.reliever.findUnique({
@@ -528,6 +577,63 @@ export const resolvers = {
                 console.log(error.message);
             }
         },
+        //update other jobs' relieverIDs when the reliever gets a job
+        //     updateRelieverIDs: async (_: any, { relieverID, jobID }) => {
+        //       try {
+        //         // const jobs = await prisma.job.findMany({
+        //         //   where: {
+        //         //     relieverIDs: {
+        //         //       has: relieverID,
+        //         //     },
+        //         //   },
+        //         // })
+        //         const job = await prisma.job.findUnique({
+        //           where: {
+        //             id: jobID,
+        //           },
+        //         })
+        // // console.log(job);
+        //         // const filteredArray = jobs.filter((dateRange) => {
+        //         //   const dateFrom = dayjs(convertDate(dateRange.date_from))
+        //         //   const dateTo = dayjs(convertDate(dateRange.date_to))
+        //         //   const objectDateFrom = dayjs(convertDate(job.date_from))
+        //         //   const objectDateTo = dayjs(convertDate(job.date_to))
+        //         //   return (
+        //         //     (dateFrom.isBefore(objectDateTo) ||
+        //         //       dateFrom.isSame(objectDateTo)) &&
+        //         //     (dateTo.isAfter(objectDateFrom) || dateTo.isAfter(objectDateFrom))
+        //         //   )
+        //         // })
+        //         // const updatedRelieverIDs = filteredArray.map((job) =>
+        //         //   job.relieverIDs.filter((id) => id !== relieverID)
+        //         // )
+        //         const updatedPosts = await prisma.job.findMany({
+        //           where: {
+        //             // id: {
+        //             //   not: {
+        //             //     equals: jobID,
+        //             //   },
+        //             // },
+        //             // date_from: {
+        //             //   lte: job.date_to,
+        //             // },
+        //             // date_to: {
+        //             //   gte: job.date_from,
+        //             // },
+        //             relieverIDs: {
+        //               has: relieverID,
+        //             },
+        //           },
+        //           // data: {
+        //           //   relieverIDs: [],
+        //           // },
+        //         })
+        //         console.log(updatedPosts);
+        //         return updatedPosts
+        //       } catch (error) {
+        //         console.log(error.message)
+        //       }
+        //     },
         //delete a reliever
         deleteReliever: async (_, { email }) => {
             const deleteReliever = await prisma.reliever.delete({
