@@ -3,6 +3,19 @@ import bcrypt from 'bcrypt';
 import { createUserSchema, updateCenterSchema, updateUserSchema, createPostSchema, updatePostSchema, } from './data-validation.js';
 import dayjs from 'dayjs';
 import { convertDate } from './helper.js';
+function extractDatesFromArray(arr) {
+    const dates = [];
+    for (let i = 0; i < arr.length; i++) {
+        const dateFromObj = dayjs(convertDate(arr[i].date_from));
+        const dateToObj = dayjs(convertDate(arr[i].date_to));
+        let currentDate = dateFromObj;
+        while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
+            dates.push(currentDate.format('DD/MM/YYYY'));
+            currentDate = currentDate.add(1, 'day');
+        }
+    }
+    return dates;
+}
 export const resolvers = {
     Query: {
         //fetch all relievers
@@ -432,20 +445,6 @@ export const resolvers = {
                         jobIDs: true,
                     },
                 });
-                function extractDatesFromArray(arr) {
-                    const dates = [];
-                    for (let i = 0; i < arr.length; i++) {
-                        const dateFromObj = dayjs(convertDate(arr[i].date_from));
-                        const dateToObj = dayjs(convertDate(arr[i].date_to));
-                        let currentDate = dateFromObj;
-                        while (currentDate.isSame(dateToObj) ||
-                            currentDate.isBefore(dateToObj)) {
-                            dates.push(currentDate.format('DD/MM/YYYY'));
-                            currentDate = currentDate.add(1, 'day');
-                        }
-                    }
-                    return dates;
-                }
                 //To avoid duplicated jobID being added
                 if (existing && !existing.jobIDs.includes(jobID)) {
                     const updatedReliever = await prisma.reliever.update({
@@ -480,6 +479,50 @@ export const resolvers = {
                 else {
                     throw new Error('You have been confirmed for this job.');
                 }
+            }
+            catch (error) {
+                console.log(error.message);
+            }
+        },
+        //update reliever's unavailable dates when job is cancelled
+        updateUnavailableDates: async (_, { relieverID, jobID }) => {
+            try {
+                const job = await prisma.job.findUnique({
+                    where: {
+                        id: jobID,
+                    },
+                    select: {
+                        date_from: true,
+                        date_to: true,
+                    },
+                });
+                const cancelledDates = [];
+                const dateFromObj = dayjs(convertDate(job.date_from));
+                const dateToObj = dayjs(convertDate(job.date_to));
+                let currentDate = dateFromObj;
+                while (currentDate.isSame(dateToObj) ||
+                    currentDate.isBefore(dateToObj)) {
+                    cancelledDates.push(currentDate.format('DD/MM/YYYY'));
+                    currentDate = currentDate.add(1, 'day');
+                }
+                const reliever = await prisma.reliever.findUnique({
+                    where: {
+                        id: relieverID,
+                    },
+                    select: {
+                        not_available_dates: true,
+                    },
+                });
+                const updated_not_available_dates = reliever.not_available_dates.filter((date) => !cancelledDates.find((cancelledDate) => cancelledDate === date));
+                const updatedReliever = await prisma.reliever.update({
+                    where: {
+                        id: relieverID,
+                    },
+                    data: {
+                        not_available_dates: updated_not_available_dates,
+                    },
+                });
+                return updatedReliever;
             }
             catch (error) {
                 console.log(error.message);
