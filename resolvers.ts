@@ -528,7 +528,6 @@ export const resolvers = {
         console.log(error.message)
       }
     },
-
     //update reliever's unavailable dates when job is cancelled
     updateUnavailableDates: async (_: any, { relieverID, jobID }) => {
       try {
