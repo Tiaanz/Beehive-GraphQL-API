@@ -34,19 +34,17 @@ function extractDatesFromArray(arr: string | any[]) {
 
   return dates
 }
-function extractDatesFromDateRange(dateFrom:string,dateTo:string) {
+function extractDatesFromDateRange(dateFrom: string, dateTo: string) {
   const dates = []
 
-  
-    const dateFromObj = dayjs(dateFrom)
-    const dateToObj = dayjs(dateTo)
+  const dateFromObj = dayjs(dateFrom)
+  const dateToObj = dayjs(dateTo)
 
-    let currentDate = dateFromObj
-    while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
-      dates.push(currentDate.format('YYYY/MM/DD'))
-      currentDate = currentDate.add(1, 'day')
-    }
-  
+  let currentDate = dateFromObj
+  while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
+    dates.push(currentDate.format('YYYY/MM/DD'))
+    currentDate = currentDate.add(1, 'day')
+  }
 
   return dates
 }
@@ -55,220 +53,213 @@ export const resolvers = {
   Query: {
     //fetch all relievers
     getAllRelievers: async (_: any, __: any) => {
-      // if (!userId) {
-      //   throw AuthenticationError
-      // }
-      return await prisma.reliever.findMany({
-        include: {
-          jobs: true,
-        },
-      })
+      try {
+        // if (!userId) {
+        //   throw AuthenticationError
+        // }
+        return await prisma.reliever.findMany({
+          include: {
+            jobs: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
     //fetch all managers
     getAllManagers: async (_: any, __: any) => {
-      // if (!userId) {
-      //   throw AuthenticationError
-      // }
-      return await prisma.manager.findMany({
-        include: {
-          center: true,
-        },
-      })
+      try {
+        // if (!userId) {
+        //   throw AuthenticationError
+        // }
+        return await prisma.manager.findMany({
+          include: {
+            center: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.messgae)
+      }
     },
 
     //fetch all centers
     getAllCenters: async (_: any, __: any) => {
-      // if (!userId) {
-      //   throw AuthenticationError
-      // }
-      return await prisma.center.findMany({
-        include: {
-          manager: true,
-          posts: true,
-        },
-      })
+      try {
+        // if (!userId) {
+        //   throw AuthenticationError
+        // }
+        return await prisma.center.findMany({
+          include: {
+            manager: true,
+            posts: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
 
     //get one center
     getOneCenter: async (_: any, { ECE_id }) => {
-      // if (!userId) {
-      //   throw AuthenticationError
-      // }
-      return await prisma.center.findUnique({
-        where: { ECE_id: ECE_id },
-        include: {
-          manager: true,
-          posts: true,
-        },
-      })
+      try {
+        // if (!userId) {
+        //   throw AuthenticationError
+        // }
+        return await prisma.center.findUnique({
+          where: { ECE_id: ECE_id },
+          include: {
+            manager: true,
+            posts: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
     //fetch filtered centers
     getFilteredCenters: async (_: any, { input }) => {
-      return await prisma.center.findMany({
-        where: {
-          name: {
-            contains: input,
-            mode: 'insensitive',
+      try {
+        return await prisma.center.findMany({
+          where: {
+            name: {
+              contains: input,
+              mode: 'insensitive',
+            },
           },
-        },
-      })
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
     //fetch one reliever
     getOneReliever: async (_: any, { email }) => {
-      return await prisma.reliever.findUnique({
-        where: {
-          email: email,
-        },
-        include: {
-          jobs: true,
-        },
-      })
+      try {
+        return await prisma.reliever.findUnique({
+          where: {
+            email: email,
+          },
+          include: {
+            jobs: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
 
     //fetch one reliever by ID
     getRelieverById: async (_: any, { reliever_id }) => {
-      return await prisma.reliever.findUnique({
-        where: {
-          id: reliever_id,
-        },
-        include: {
-          jobs: true,
-        },
-      })
+      try {
+        return await prisma.reliever.findUnique({
+          where: {
+            id: reliever_id,
+          },
+          include: {
+            jobs: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
 
     //fetch one manager
     getOneManager: async (_: any, { email }) => {
-      return await prisma.manager.findUnique({
-        where: {
-          email: email,
-        },
-      })
+      try {
+        return await prisma.manager.findUnique({
+          where: {
+            email: email,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
     //fetch posts by center
     getPostsByCenter: async (_: any, { center_id, date_from, date_to }) => {
-      // if (!userId) {
-      //   throw AuthenticationError
-      // }
-      return await prisma.job.findMany({
-        where: {
-          center_id,
-          date_from: { lte: date_from },
-          date_to: { gte: date_to },
-        },
-        include: {
-          relievers: true,
-          center: true,
-        },
-      })
+      try {
+        // if (!userId) {
+        //   throw AuthenticationError
+        // }
+        return await prisma.job.findMany({
+          where: {
+            center_id,
+            date_from: { lte: date_from },
+            date_to: { gte: date_to },
+          },
+          include: {
+            relievers: true,
+            center: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
 
     //fetch "OPEN" jobs
     getOpenJobs: async (_: any) => {
-      // if (!userId) {
-      //   throw AuthenticationError
-      // }
-      return await prisma.job.findMany({
-        where: {
-          status: 'OPEN',
-        },
-        include: {
-          relievers: true,
-          center: true,
-        },
-      })
+      try {
+        // if (!userId) {
+        //   throw AuthenticationError
+        // }
+        return await prisma.job.findMany({
+          where: {
+            status: 'OPEN',
+          },
+          include: {
+            relievers: true,
+            center: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
 
     //fetch jobs reliever applied
     getJobsByReliever: async (_: any, { date_from, date_to }) => {
-      // if (!userId) {
-      //   throw AuthenticationError
-      // }
-      return await prisma.job.findMany({
-        where: {
-          date_from: { lte: date_from },
-          date_to: { gte: date_to },
-        },
-        include: {
-          relievers: true,
-          center: true,
-        },
-      })
+      try {
+        // if (!userId) {
+        //   throw AuthenticationError
+        // }
+        return await prisma.job.findMany({
+          where: {
+            date_from: { lte: date_from },
+            date_to: { gte: date_to },
+          },
+          include: {
+            relievers: true,
+            center: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
 
     //fetch job by ID
     getJobById: async (_: any, { job_id }) => {
-      // if (!userId) {
-      //   throw AuthenticationError
-      // }
-      return await prisma.job.findUnique({
-        where: {
-          id: job_id,
-        },
-        include: {
-          relievers: true,
-          center: {
-            include: {
-              manager: true,
+      try {
+        // if (!userId) {
+        //   throw AuthenticationError
+        // }
+        return await prisma.job.findUnique({
+          where: {
+            id: job_id,
+          },
+          include: {
+            relievers: true,
+            center: {
+              include: {
+                manager: true,
+              },
             },
           },
-        },
-      })
-    },
-
-    getRelieverIDs: async (_: any, { relieverID, jobID }) => {
-      const job = await prisma.job.findUnique({
-        where: {
-          id: jobID,
-        },
-      })
-
-      const filteredPosts = await prisma.job.findMany({
-        where: {
-          id: {
-            not: {
-              equals: jobID,
-            },
-          },
-          date_from: {
-            lte: job.date_to,
-          },
-          date_to: {
-            gte: job.date_from,
-          },
-          relieverIDs: {
-            has: relieverID,
-          },
-        },
-      })
-
-      const updatedPosts = filteredPosts.map((post) => {
-        return {
-          ...post,
-          relieverIDs: post.relieverIDs.filter((id) => id !== relieverID),
-        }
-      })
-
-      return await prisma.job.updateMany({
-        where: {
-          id: {
-            not: {
-              equals: jobID,
-            },
-          },
-          date_from: {
-            lte: job.date_to,
-          },
-          date_to: {
-            gte: job.date_from,
-          },
-          relieverIDs: {
-            has: relieverID,
-          },
-        },
-        data: updatedPosts
-      })
-    
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
     },
   },
 
@@ -579,10 +570,13 @@ export const resolvers = {
             },
             select: {
               date_from: true,
-              date_to:true
+              date_to: true,
             },
           })
-          const unavailableDates = extractDatesFromDateRange(job.date_from,job.date_to)
+          const unavailableDates = extractDatesFromDateRange(
+            job.date_from,
+            job.date_to
+          )
           const updatedReliever2 = await prisma.reliever.update({
             where: {
               id: id,
@@ -657,13 +651,12 @@ export const resolvers = {
     // update other jobs' relieverIDs when the reliever gets a job
     updateRelieverIDs: async (_: any, { relieverID, jobID }) => {
       try {
-        
         const job = await prisma.job.findUnique({
           where: {
             id: jobID,
           },
         })
-  
+
         const filteredPosts = await prisma.job.findMany({
           where: {
             id: {
@@ -682,23 +675,23 @@ export const resolvers = {
             },
           },
         })
-  
+
         const updatedPosts = filteredPosts.map((post) => {
           return {
             ...post,
             relieverIDs: post.relieverIDs.filter((id) => id !== relieverID),
           }
         })
-  
-        for (let i = 0; i < updatedPosts.length; i++){
+
+        for (let i = 0; i < updatedPosts.length; i++) {
           await prisma.job.update({
             where: {
-             id:updatedPosts[i].id
+              id: updatedPosts[i].id,
             },
             data: {
-              relieverIDs:updatedPosts[i].relieverIDs
-            }
-         })
+              relieverIDs: updatedPosts[i].relieverIDs,
+            },
+          })
         }
         return updatedPosts
       } catch (error) {
@@ -708,22 +701,30 @@ export const resolvers = {
 
     //delete a reliever
     deleteReliever: async (_: any, { email }) => {
-      const deleteReliever = await prisma.reliever.delete({
-        where: {
-          email: email,
-        },
-      })
-      return deleteReliever
+      try {
+        const deleteReliever = await prisma.reliever.delete({
+          where: {
+            email: email,
+          },
+        })
+        return deleteReliever
+      } catch (error) {
+        console.log(error.message)
+      }
     },
 
     //delete a manager
     deleteManager: async (_: any, { email }) => {
-      const deleteManager = await prisma.manager.delete({
-        where: {
-          email: email,
-        },
-      })
-      return deleteManager
+      try {
+        const deleteManager = await prisma.manager.delete({
+          where: {
+            email: email,
+          },
+        })
+        return deleteManager
+      } catch (error) {
+        console.log(error.message)
+      }
     },
   },
 }
