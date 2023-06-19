@@ -17,7 +17,6 @@ export const typeDefs = gql `
     getOpenJobs: [Job!]!
     getJobsByReliever(date_from: String!, date_to: String!): [Job!]!
     getJobById(job_id: String!): Job
-    getRelieverIDs(relieverID:String!,jobID:String!):[Job!]!
   }
 
   type Mutation {
