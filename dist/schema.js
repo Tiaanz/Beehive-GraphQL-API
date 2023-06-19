@@ -68,7 +68,7 @@ export const typeDefs = gql `
     acceptJob(id: String!, relieverID: String!): Job
     getJob(id: String!, jobID: String!): Reliever
     updateUnavailableDates(relieverID:String!,jobID:String!):Reliever
-   
+    updateRelieverIDs(relieverID:String!,jobID:String!):[Job!]
   }
 
   type Reliever {
