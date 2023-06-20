@@ -268,6 +268,7 @@ export const resolvers = {
                 if (error.message.includes('Reliever_email_key')) {
                     throw new Error('This email has been registered.');
                 }
+                console.log(error.message);
             }
         },
         //update reliever
@@ -287,6 +288,7 @@ export const resolvers = {
             }
             catch (error) {
                 throw new Error('Bio must contain at most 1000 characters.');
+                console.log(error.message);
             }
         },
         // update a center
@@ -305,6 +307,7 @@ export const resolvers = {
             }
             catch (error) {
                 throw new Error('Description must contain at most 1000 characters.');
+                console.log(error.message);
             }
         },
         //create a manager
@@ -333,6 +336,7 @@ export const resolvers = {
                 if (error.message.includes('Manager_ECE_id_key')) {
                     throw new Error('This centre has a manager registered.');
                 }
+                console.log(error.message);
             }
         },
         //add a post
@@ -340,17 +344,22 @@ export const resolvers = {
             try {
                 const validatedData = createPostSchema.parse(args);
                 const { date_from, date_to, time, qualified } = validatedData;
-                const post = await prisma.job.create({
-                    data: {
-                        center_id: args.center_id,
-                        date_from,
-                        date_to,
-                        time,
-                        qualified,
-                        status: 'OPEN',
-                    },
-                });
-                return post;
+                if (new Date(date_from) <= new Date(date_to)) {
+                    const post = await prisma.job.create({
+                        data: {
+                            center_id: args.center_id,
+                            date_from,
+                            date_to,
+                            time,
+                            qualified,
+                            status: 'OPEN',
+                        },
+                    });
+                    return post;
+                }
+                else {
+                    throw new Error('Date_from should be less than date_to.');
+                }
             }
             catch (error) {
                 console.log(error.message);
@@ -361,19 +370,24 @@ export const resolvers = {
             try {
                 const validatedData = updatePostSchema.parse(args);
                 const { date_from, date_to, time, qualified, post_id } = validatedData;
-                const post = await prisma.job.update({
-                    where: {
-                        id: post_id,
-                    },
-                    data: {
-                        date_from,
-                        date_to,
-                        time,
-                        qualified,
-                        status: args.status,
-                    },
-                });
-                return post;
+                if (new Date(date_from) <= new Date(date_to)) {
+                    const post = await prisma.job.update({
+                        where: {
+                            id: post_id,
+                        },
+                        data: {
+                            date_from,
+                            date_to,
+                            time,
+                            qualified,
+                            status: args.status,
+                        },
+                    });
+                    return post;
+                }
+                else {
+                    throw new Error('Date_from should be less than date_to.');
+                }
             }
             catch (error) {
                 console.log(error.message);
@@ -398,6 +412,7 @@ export const resolvers = {
                         declined_relieverIDs: true,
                     },
                 });
+                //avoid duplicated relieverId being added
                 if (applied &&
                     !applied.relieverIDs.includes(relieverID) &&
                     !declined.declined_relieverIDs.includes(relieverID)) {
@@ -440,6 +455,7 @@ export const resolvers = {
                         relieverIDs: true,
                     },
                 });
+                //avoid duplicated relieverId being added
                 if (declined &&
                     !declined.declined_relieverIDs.includes(relieverID) &&
                     !applied.relieverIDs.includes(relieverID)) {
@@ -482,6 +498,7 @@ export const resolvers = {
                         relieverIDs: true,
                     },
                 });
+                //Make sure the reliever have applied the job and have not declined it  
                 if (applied &&
                     !declined.declined_relieverIDs.includes(relieverID) &&
                     applied.relieverIDs.includes(relieverID)) {
@@ -537,6 +554,7 @@ export const resolvers = {
                         },
                     });
                     const unavailableDates = extractDatesFromDateRange(job.date_from, job.date_to);
+                    //set unavailable dates
                     const updatedReliever2 = await prisma.reliever.update({
                         where: {
                             id: id,
