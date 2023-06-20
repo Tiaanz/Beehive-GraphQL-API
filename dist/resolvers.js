@@ -2,30 +2,7 @@ import { prisma } from './db.js';
 import bcrypt from 'bcrypt';
 import { createUserSchema, updateCenterSchema, updateUserSchema, createPostSchema, updatePostSchema, } from './data-validation.js';
 import dayjs from 'dayjs';
-function extractDatesFromArray(arr) {
-    const dates = [];
-    for (let i = 0; i < arr.length; i++) {
-        const dateFromObj = dayjs(arr[i].date_from);
-        const dateToObj = dayjs(arr[i].date_to);
-        let currentDate = dateFromObj;
-        while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
-            dates.push(currentDate.format('YYYY/MM/DD'));
-            currentDate = currentDate.add(1, 'day');
-        }
-    }
-    return dates;
-}
-function extractDatesFromDateRange(dateFrom, dateTo) {
-    const dates = [];
-    const dateFromObj = dayjs(dateFrom);
-    const dateToObj = dayjs(dateTo);
-    let currentDate = dateFromObj;
-    while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
-        dates.push(currentDate.format('YYYY/MM/DD'));
-        currentDate = currentDate.add(1, 'day');
-    }
-    return dates;
-}
+import { extractDatesFromDateRange } from './helper.js';
 export const resolvers = {
     Query: {
         //fetch all relievers
@@ -392,7 +369,8 @@ export const resolvers = {
             try {
                 const validatedData = updatePostSchema.parse(args);
                 const { date_from, date_to, time, qualified, post_id } = validatedData;
-                if (new Date(date_from) <= new Date(date_to)) {
+                if (dayjs(date_from).isSame(date_to, 'day') ||
+                    dayjs(date_from).isBefore(date_to, 'day')) {
                     const post = await prisma.job.update({
                         where: {
                             id: post_id,

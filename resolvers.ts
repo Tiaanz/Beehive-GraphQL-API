@@ -19,9 +19,6 @@ import dayjs from 'dayjs'
 import { Status } from '@prisma/client'
 import { extractDatesFromDateRange } from './helper.js'
 
-
-
-
 export const resolvers = {
   Query: {
     //fetch all relievers
@@ -386,7 +383,10 @@ export const resolvers = {
       try {
         const validatedData = updatePostSchema.parse(args)
         const { date_from, date_to, time, qualified, post_id } = validatedData
-        if (new Date(date_from) <= new Date(date_to)) {
+        if (
+          dayjs(date_from).isSame(date_to, 'day') ||
+          dayjs(date_from).isBefore(date_to, 'day')
+        ) {
           const post = await prisma.job.update({
             where: {
               id: post_id,

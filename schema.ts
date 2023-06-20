@@ -16,9 +16,9 @@ export const typeDefs = gql`
       date_to: String
     ): [Job!]!
     getPostsByMonth(
-      center_id: Int!
-      date_from: String
-      date_to: String
+      center_id: Int
+      date_from: String!
+      date_to: String!
     ): [Job!]!
     getOpenJobs: [Job!]!
     getJobsByReliever(date_from: String!, date_to: String!): [Job!]!
