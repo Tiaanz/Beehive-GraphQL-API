@@ -17,37 +17,10 @@ import {
 } from './data-validation.js'
 import dayjs from 'dayjs'
 import { Status } from '@prisma/client'
+import { extractDatesFromDateRange } from './helper.js'
 
-function extractDatesFromArray(arr: string | any[]) {
-  const dates = []
 
-  for (let i = 0; i < arr.length; i++) {
-    const dateFromObj = dayjs(arr[i].date_from)
-    const dateToObj = dayjs(arr[i].date_to)
 
-    let currentDate = dateFromObj
-    while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
-      dates.push(currentDate.format('YYYY/MM/DD'))
-      currentDate = currentDate.add(1, 'day')
-    }
-  }
-
-  return dates
-}
-function extractDatesFromDateRange(dateFrom: string, dateTo: string) {
-  const dates = []
-
-  const dateFromObj = dayjs(dateFrom)
-  const dateToObj = dayjs(dateTo)
-
-  let currentDate = dateFromObj
-  while (currentDate.isSame(dateToObj) || currentDate.isBefore(dateToObj)) {
-    dates.push(currentDate.format('YYYY/MM/DD'))
-    currentDate = currentDate.add(1, 'day')
-  }
-
-  return dates
-}
 
 export const resolvers = {
   Query: {
@@ -186,6 +159,28 @@ export const resolvers = {
             center_id,
             date_from: { lte: date_from },
             date_to: { gte: date_to },
+          },
+          include: {
+            relievers: true,
+            center: true,
+          },
+        })
+      } catch (error) {
+        console.log(error.message)
+      }
+    },
+
+    //fetch posts by month
+    getPostsByMonth: async (_: any, { center_id, date_from, date_to }) => {
+      try {
+        // if (!userId) {
+        //   throw AuthenticationError
+        // }
+        return await prisma.job.findMany({
+          where: {
+            center_id,
+            date_from: { gte: date_from },
+            date_to: { lte: date_to },
           },
           include: {
             relievers: true,
@@ -527,7 +522,7 @@ export const resolvers = {
           },
         })
 
-        //Make sure the reliever have applied the job and have not declined it  
+        //Make sure the reliever have applied the job and have not declined it
         if (
           applied &&
           !declined.declined_relieverIDs.includes(relieverID) &&

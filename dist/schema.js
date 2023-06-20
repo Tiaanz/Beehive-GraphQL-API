@@ -14,6 +14,11 @@ export const typeDefs = gql `
       date_from: String
       date_to: String
     ): [Job!]!
+    getPostsByMonth(
+      center_id: Int!
+      date_from: String
+      date_to: String
+    ): [Job!]!
     getOpenJobs: [Job!]!
     getJobsByReliever(date_from: String!, date_to: String!): [Job!]!
     getJobById(job_id: String!): Job
@@ -66,8 +71,8 @@ export const typeDefs = gql `
     declineJob(id: String!, relieverID: String!): Job
     acceptJob(id: String!, relieverID: String!): Job
     getJob(id: String!, jobID: String!): Reliever
-    updateUnavailableDates(relieverID:String!,jobID:String!):Reliever
-    updateRelieverIDs(relieverID:String!,jobID:String!):[Job!]
+    updateUnavailableDates(relieverID: String!, jobID: String!): Reliever
+    updateRelieverIDs(relieverID: String!, jobID: String!): [Job!]
   }
 
   type Reliever {

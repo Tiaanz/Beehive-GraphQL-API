@@ -178,6 +178,28 @@ export const resolvers = {
                 console.log(error.message);
             }
         },
+        //fetch posts by month
+        getPostsByMonth: async (_, { center_id, date_from, date_to }) => {
+            try {
+                // if (!userId) {
+                //   throw AuthenticationError
+                // }
+                return await prisma.job.findMany({
+                    where: {
+                        center_id,
+                        date_from: { gte: date_from },
+                        date_to: { lte: date_to },
+                    },
+                    include: {
+                        relievers: true,
+                        center: true,
+                    },
+                });
+            }
+            catch (error) {
+                console.log(error.message);
+            }
+        },
         //fetch "OPEN" jobs
         getOpenJobs: async (_) => {
             try {
@@ -498,7 +520,7 @@ export const resolvers = {
                         relieverIDs: true,
                     },
                 });
-                //Make sure the reliever have applied the job and have not declined it  
+                //Make sure the reliever have applied the job and have not declined it
                 if (applied &&
                     !declined.declined_relieverIDs.includes(relieverID) &&
                     applied.relieverIDs.includes(relieverID)) {
