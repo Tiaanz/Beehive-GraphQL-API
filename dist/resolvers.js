@@ -164,8 +164,12 @@ export const resolvers = {
                 return await prisma.job.findMany({
                     where: {
                         center_id,
-                        date_from: { gte: date_from },
-                        date_to: { lte: date_to },
+                        date_from: { lte: date_to },
+                        date_to: { gte: date_from },
+                        OR: [
+                            { date_from: { gte: date_from } },
+                            { date_to: { lte: date_to } },
+                        ],
                     },
                     include: {
                         relievers: true,
