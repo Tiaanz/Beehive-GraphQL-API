@@ -6,7 +6,6 @@ import {
   addPostInput,
   updatePostInput,
 } from './model.js'
-import { AuthenticationError } from './utils/errors.js'
 import bcrypt from 'bcrypt'
 import {
   createUserSchema,
