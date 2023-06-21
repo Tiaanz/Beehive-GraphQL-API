@@ -19,6 +19,7 @@ import dayjs from 'dayjs'
 import { Status } from '@prisma/client'
 import { extractDatesFromDateRange } from './helper.js'
 
+
 export const resolvers = {
   Query: {
     //fetch all relievers
@@ -177,7 +178,7 @@ export const resolvers = {
           where: {
             center_id,
             date_from: { lte: date_to },
-            date_to:{gte:date_from},
+            date_to: { gte: date_from },
             OR: [
               { date_from: { gte: date_from } },
               { date_to: { lte: date_to } },
@@ -266,7 +267,7 @@ export const resolvers = {
         const validatedData = createUserSchema.parse(args)
         const { first_name, last_name, phone, email, password } = validatedData
         const hashedPwd = await bcrypt.hash(password, 10)
-
+      
         const reliever = await prisma.reliever.create({
           data: {
             first_name,
@@ -278,6 +279,7 @@ export const resolvers = {
             qualified: args.qualified,
           },
         })
+      
         return reliever
       } catch (error) {
         if (error.message.includes('Reliever_email_key')) {
@@ -286,6 +288,7 @@ export const resolvers = {
         console.log(error.message)
       }
     },
+
     //update reliever
     updateReliever: async (_: any, args: updateUserInput) => {
       try {

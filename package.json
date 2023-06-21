@@ -19,10 +19,12 @@
     "dotenv": "^16.0.3",
     "graphql": "^16.6.0",
     "graphql-tag": "^2.12.6",
+    "jsonwebtoken": "^9.0.0",
     "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^18.16.3",
     "prisma": "^4.13.0",
     "ts-node": "^10.9.1",

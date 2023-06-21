@@ -78,7 +78,7 @@ export const resolvers = {
                 return await prisma.center.findMany({
                     where: {
                         name: {
-                            contains: input.trim(),
+                            contains: input,
                             mode: 'insensitive',
                         },
                     },

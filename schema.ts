@@ -83,6 +83,7 @@ export const typeDefs = gql`
     phone: String!
     email: String!
     password: String!
+    token: String
     qualified: Boolean!
     role: String!
     jobIDs: [String]
@@ -99,6 +100,7 @@ export const typeDefs = gql`
     phone: String!
     email: String!
     password: String!
+    token: String
     role: String!
     ECE_id: Int!
     center: Center
