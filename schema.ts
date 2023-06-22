@@ -3,8 +3,6 @@ import { gql } from 'graphql-tag'
 export const typeDefs = gql`
   type Query {
     getAllRelievers: [Reliever!]!
-    getAllManagers: [Manager!]!
-    getAllCenters: [Center!]!
     getFilteredCenters(input: String!): [Center!]!
     getOneReliever(email: String!): Reliever
     getRelieverById(reliever_id: String!): Reliever
@@ -14,14 +12,14 @@ export const typeDefs = gql`
       center_id: Int!
       date_from: String
       date_to: String
-    ): [Job!]!
+    ): [Job]
     getPostsByMonth(
       center_id: Int
       date_from: String!
       date_to: String!
-    ): [Job!]!
-    getOpenJobs: [Job!]!
-    getJobsByReliever(date_from: String!, date_to: String!): [Job!]!
+    ): [Job]
+    getOpenJobs: [Job]
+    getJobsByReliever(date_from: String!, date_to: String!): [Job]
     getJobById(job_id: String!): Job
   }
 
@@ -42,7 +40,6 @@ export const typeDefs = gql`
       photo_url: String
       qualified: Boolean
     ): Reliever
-    deleteReliever(email: String!): Reliever
     addManager(
       first_name: String!
       last_name: String!
@@ -51,7 +48,6 @@ export const typeDefs = gql`
       ECE_id: Int!
       password: String!
     ): Manager
-    deleteManager(email: String!): Manager
     updateCenter(ECE_id: Int!, description: String, photo_url: String): Center
     addPost(
       center_id: Int!

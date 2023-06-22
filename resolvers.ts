@@ -16,17 +16,18 @@ import {
 } from './data-validation.js'
 import dayjs from 'dayjs'
 import { Status } from '@prisma/client'
+import jwt from 'jsonwebtoken'
 import { extractDatesFromDateRange } from './helper.js'
-
+import { AuthenticationError, ForbiddenError } from './utils/errors.js'
 
 export const resolvers = {
   Query: {
     //fetch all relievers
-    getAllRelievers: async (_: any, __: any) => {
+    getAllRelievers: async (_: any, __: any, { userRole }) => {
       try {
-        // if (!userId) {
-        //   throw AuthenticationError
-        // }
+        if (userRole !== 'MANAGER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         return await prisma.reliever.findMany({
           include: {
             jobs: true,
@@ -36,45 +37,13 @@ export const resolvers = {
         console.log(error.message)
       }
     },
-    //fetch all managers
-    getAllManagers: async (_: any, __: any) => {
-      try {
-        // if (!userId) {
-        //   throw AuthenticationError
-        // }
-        return await prisma.manager.findMany({
-          include: {
-            center: true,
-          },
-        })
-      } catch (error) {
-        console.log(error.messgae)
-      }
-    },
-
-    //fetch all centers
-    getAllCenters: async (_: any, __: any) => {
-      try {
-        // if (!userId) {
-        //   throw AuthenticationError
-        // }
-        return await prisma.center.findMany({
-          include: {
-            manager: true,
-            posts: true,
-          },
-        })
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
 
     //get one center
-    getOneCenter: async (_: any, { ECE_id }) => {
+    getOneCenter: async (_: any, { ECE_id }, { userRole }) => {
       try {
-        // if (!userId) {
-        //   throw AuthenticationError
-        // }
+        if (userRole === 'GUEST') {
+          throw ForbiddenError('You are not authorised.')
+        }
         return await prisma.center.findUnique({
           where: { ECE_id: ECE_id },
           include: {
@@ -86,6 +55,7 @@ export const resolvers = {
         console.log(error.message)
       }
     },
+
     //fetch filtered centers
     getFilteredCenters: async (_: any, { input }) => {
       try {
@@ -101,8 +71,9 @@ export const resolvers = {
         console.log(error.message)
       }
     },
+
     //fetch one reliever
-    getOneReliever: async (_: any, { email }) => {
+    getOneReliever: async (_: any, { email }, { userRole }) => {
       try {
         return await prisma.reliever.findUnique({
           where: {
@@ -118,8 +89,11 @@ export const resolvers = {
     },
 
     //fetch one reliever by ID
-    getRelieverById: async (_: any, { reliever_id }) => {
+    getRelieverById: async (_: any, { reliever_id }, { userRole }) => {
       try {
+        if (userRole === 'GUEST') {
+          throw ForbiddenError('You are not authorised.')
+        }
         return await prisma.reliever.findUnique({
           where: {
             id: reliever_id,
@@ -134,7 +108,7 @@ export const resolvers = {
     },
 
     //fetch one manager
-    getOneManager: async (_: any, { email }) => {
+    getOneManager: async (_: any, { email }, { userRole }) => {
       try {
         return await prisma.manager.findUnique({
           where: {
@@ -146,11 +120,15 @@ export const resolvers = {
       }
     },
     //fetch posts by center
-    getPostsByCenter: async (_: any, { center_id, date_from, date_to }) => {
+    getPostsByCenter: async (
+      _: any,
+      { center_id, date_from, date_to },
+      { userRole }
+    ) => {
       try {
-        // if (!userId) {
-        //   throw AuthenticationError
-        // }
+        if (userRole !== 'MANAGER') {
+          throw AuthenticationError
+        }
         return await prisma.job.findMany({
           where: {
             center_id,
@@ -168,11 +146,15 @@ export const resolvers = {
     },
 
     //fetch posts by month
-    getPostsByMonth: async (_: any, { center_id, date_from, date_to }) => {
+    getPostsByMonth: async (
+      _: any,
+      { center_id, date_from, date_to },
+      { userRole }
+    ) => {
       try {
-        // if (!userId) {
-        //   throw AuthenticationError
-        // }
+        if (userRole === 'GUEST') {
+          throw ForbiddenError('You are not authorised.')
+        }
         return await prisma.job.findMany({
           where: {
             center_id,
@@ -194,11 +176,13 @@ export const resolvers = {
     },
 
     //fetch "OPEN" jobs
-    getOpenJobs: async (_: any) => {
+    getOpenJobs: async (_: any, __: any, { userRole }) => {
       try {
-        // if (!userId) {
-        //   throw AuthenticationError
-        // }
+     
+        
+        if (userRole === 'GUEST') {
+          throw ForbiddenError('You are not authorised.')
+        }
         return await prisma.job.findMany({
           where: {
             status: 'OPEN',
@@ -214,11 +198,11 @@ export const resolvers = {
     },
 
     //fetch jobs reliever applied
-    getJobsByReliever: async (_: any, { date_from, date_to }) => {
+    getJobsByReliever: async (_: any, { date_from, date_to }, { userRole }) => {
       try {
-        // if (!userId) {
-        //   throw AuthenticationError
-        // }
+        if (userRole !== 'RELIEVER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         return await prisma.job.findMany({
           where: {
             date_from: { lte: date_from },
@@ -235,11 +219,11 @@ export const resolvers = {
     },
 
     //fetch job by ID
-    getJobById: async (_: any, { job_id }) => {
+    getJobById: async (_: any, { job_id }, { userRole }) => {
       try {
-        // if (!userId) {
-        //   throw AuthenticationError
-        // }
+        if (userRole === 'GUEST') {
+          throw ForbiddenError('You are not authorised.')
+        }
         return await prisma.job.findUnique({
           where: {
             id: job_id,
@@ -266,7 +250,7 @@ export const resolvers = {
         const validatedData = createUserSchema.parse(args)
         const { first_name, last_name, phone, email, password } = validatedData
         const hashedPwd = await bcrypt.hash(password, 10)
-      
+
         const reliever = await prisma.reliever.create({
           data: {
             first_name,
@@ -278,8 +262,20 @@ export const resolvers = {
             qualified: args.qualified,
           },
         })
-      
-        return reliever
+        const token = jwt.sign(
+          { user_id: reliever.id, email: reliever.email },
+          process.env.TOKEN
+        )
+        const relieverWithToken = await prisma.reliever.update({
+          where: {
+            id: reliever.id,
+          },
+          data: {
+            token: token,
+          },
+        })
+
+        return relieverWithToken
       } catch (error) {
         if (error.message.includes('Reliever_email_key')) {
           throw new Error('This email has been registered.')
@@ -289,8 +285,11 @@ export const resolvers = {
     },
 
     //update reliever
-    updateReliever: async (_: any, args: updateUserInput) => {
+    updateReliever: async (_: any, args: updateUserInput, { userRole }) => {
       try {
+        if (userRole !== 'RELIEVER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const validatedData = updateUserSchema.parse(args)
         const { bio, email, photo_url } = validatedData
 
@@ -304,14 +303,17 @@ export const resolvers = {
         })
         return reliever
       } catch (error) {
-        throw new Error('Bio must contain at most 1000 characters.')
         console.log(error.message)
+        throw new Error('Bio must contain at most 1000 characters.')
       }
     },
 
     // update a center
-    updateCenter: async (_: any, args: updateCenterInput) => {
+    updateCenter: async (_: any, args: updateCenterInput, { userRole }) => {
       try {
+        if (userRole !== 'MANAGER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const validatedData = updateCenterSchema.parse(args)
         const { description, photo_url } = validatedData
 
@@ -324,8 +326,8 @@ export const resolvers = {
         })
         return center
       } catch (error) {
-        throw new Error('Description must contain at most 1000 characters.')
         console.log(error.message)
+        throw new Error('Description must contain at most 1000 characters.')
       }
     },
 
@@ -347,7 +349,20 @@ export const resolvers = {
           },
         })
 
-        return manager
+        const token = jwt.sign(
+          { user_id: manager.id, email: manager.email },
+          process.env.TOKEN
+        )
+        const managerWithToken = await prisma.manager.update({
+          where: {
+            id: manager.id,
+          },
+          data: {
+            token: token,
+          },
+        })
+
+        return managerWithToken
       } catch (error) {
         if (error.message.includes('Manager_email_key')) {
           throw new Error('This email has been registered.')
@@ -360,8 +375,13 @@ export const resolvers = {
     },
 
     //add a post
-    addPost: async (_: any, args: addPostInput) => {
+    addPost: async (_: any, args: addPostInput, { userRole }) => {
       try {
+        console.log(userRole);
+        
+        if (userRole !== 'MANAGER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const validatedData = createPostSchema.parse(args)
         const { date_from, date_to, time, qualified } = validatedData
         if (new Date(date_from) <= new Date(date_to)) {
@@ -385,8 +405,11 @@ export const resolvers = {
     },
 
     //update a post
-    updatePost: async (_: any, args: updatePostInput) => {
+    updatePost: async (_: any, args: updatePostInput, { userRole }) => {
       try {
+        if (userRole !== 'MANAGER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const validatedData = updatePostSchema.parse(args)
         const { date_from, date_to, time, qualified, post_id } = validatedData
         if (
@@ -415,8 +438,11 @@ export const resolvers = {
     },
 
     //update a Job by adding an applicant
-    applyJob: async (_: any, { id, relieverID }) => {
+    applyJob: async (_: any, { id, relieverID }, { userRole }) => {
       try {
+        if (userRole !== 'RELIEVER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const applied = await prisma.job.findUnique({
           where: {
             id: id,
@@ -462,8 +488,11 @@ export const resolvers = {
     },
 
     //When a reliever declines the job
-    declineJob: async (_: any, { id, relieverID }) => {
+    declineJob: async (_: any, { id, relieverID }, { userRole }) => {
       try {
+        if (userRole !== 'RELIEVER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const declined = await prisma.job.findUnique({
           where: {
             id: id,
@@ -508,8 +537,11 @@ export const resolvers = {
     },
 
     //When a manager accpets a job
-    acceptJob: async (_: any, { id, relieverID }) => {
+    acceptJob: async (_: any, { id, relieverID }, { userRole }) => {
       try {
+        if (userRole !== 'MANAGER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const declined = await prisma.job.findUnique({
           where: {
             id: id,
@@ -554,8 +586,11 @@ export const resolvers = {
     },
 
     //When a reliever gets a job
-    getJob: async (_: any, { id, jobID }) => {
+    getJob: async (_: any, { id, jobID }, { userRole }) => {
       try {
+        if (userRole !== 'MANAGER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const existing = await prisma.reliever.findUnique({
           where: {
             id: id,
@@ -611,8 +646,15 @@ export const resolvers = {
     },
 
     //update reliever's unavailable dates when job is cancelled
-    updateUnavailableDates: async (_: any, { relieverID, jobID }) => {
+    updateUnavailableDates: async (
+      _: any,
+      { relieverID, jobID },
+      { userRole }
+    ) => {
       try {
+        if (userRole !== 'MANAGER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const job = await prisma.job.findUnique({
           where: {
             id: jobID,
@@ -665,8 +707,11 @@ export const resolvers = {
     },
 
     // update other jobs' relieverIDs when the reliever gets a job
-    updateRelieverIDs: async (_: any, { relieverID, jobID }) => {
+    updateRelieverIDs: async (_: any, { relieverID, jobID }, { userRole }) => {
       try {
+        if (userRole !== 'MANAGER') {
+          throw ForbiddenError('You are not authorised.')
+        }
         const job = await prisma.job.findUnique({
           where: {
             id: jobID,
@@ -710,34 +755,6 @@ export const resolvers = {
           })
         }
         return updatedPosts
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
-
-    //delete a reliever
-    deleteReliever: async (_: any, { email }) => {
-      try {
-        const deleteReliever = await prisma.reliever.delete({
-          where: {
-            email: email,
-          },
-        })
-        return deleteReliever
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
-
-    //delete a manager
-    deleteManager: async (_: any, { email }) => {
-      try {
-        const deleteManager = await prisma.manager.delete({
-          where: {
-            email: email,
-          },
-        })
-        return deleteManager
       } catch (error) {
         console.log(error.message)
       }
