@@ -16,14 +16,12 @@ config();
         context: async ({ req }) => {
             // Get the user token from the headers.
             const token = req.headers.authorization;
-            console.log("token", token);
             const relieverRes = await prisma.reliever.findFirst({
                 where: { token },
             });
             const managerRes = await prisma.manager.findFirst({
                 where: { token },
             });
-            console.log(managerRes);
             // Add the user to the context
             if (relieverRes) {
                 return { userId: relieverRes.id, userRole: relieverRes.role };

@@ -377,7 +377,6 @@ export const resolvers = {
     //add a post
     addPost: async (_: any, args: addPostInput, { userRole }) => {
       try {
-        console.log(userRole);
         
         if (userRole !== 'MANAGER') {
           throw ForbiddenError('You are not authorised.')

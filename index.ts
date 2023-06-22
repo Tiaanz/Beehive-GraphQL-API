@@ -3,7 +3,6 @@ import { startStandaloneServer } from '@apollo/server/standalone'
 import { typeDefs } from './schema.js'
 import { resolvers } from './resolvers.js'
 import { prisma } from './db.js'
-import { AuthenticationError } from './utils/errors.js'
 import { config } from 'dotenv'
 config()
 ;(async function () {
@@ -18,8 +17,6 @@ config()
     context: async ({ req }) => {
       // Get the user token from the headers.
       const token = req.headers.authorization 
-      console.log("token",token);
-      
       
       const relieverRes = await prisma.reliever.findFirst({
         where: { token },
@@ -28,7 +25,7 @@ config()
         where: { token },
       })
 
-      console.log(managerRes);
+   
       
       // Add the user to the context
       if (relieverRes) {
