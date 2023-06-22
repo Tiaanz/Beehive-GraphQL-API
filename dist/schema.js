@@ -1,7 +1,6 @@
 import { gql } from 'graphql-tag';
 export const typeDefs = gql `
   type Query {
-    getAllRelievers: [Reliever!]!
     getFilteredCenters(input: String!): [Center!]!
     getOneReliever(email: String!): Reliever
     getRelieverById(reliever_id: String!): Reliever

@@ -7,7 +7,22 @@ import { extractDatesFromDateRange } from './helper.js';
 import { AuthenticationError, ForbiddenError } from './utils/errors.js';
 export const resolvers = {
     Query: {
-
+        //fetch all relievers
+        getAllRelievers: async (_, __, { userRole }) => {
+            try {
+                if (userRole !== 'MANAGER') {
+                    throw ForbiddenError('You are not authorised.');
+                }
+                return await prisma.reliever.findMany({
+                    include: {
+                        jobs: true,
+                    },
+                });
+            }
+            catch (error) {
+                console.log(error.message);
+            }
+        },
         //get one center
         getOneCenter: async (_, { ECE_id }, { userRole }) => {
             try {
@@ -43,7 +58,7 @@ export const resolvers = {
             }
         },
         //fetch one reliever
-        getOneReliever: async (_, { email }, { userRole }) => {
+        getOneReliever: async (_, { email }) => {
             try {
                 return await prisma.reliever.findUnique({
                     where: {

@@ -22,21 +22,7 @@ import { AuthenticationError, ForbiddenError } from './utils/errors.js'
 
 export const resolvers = {
   Query: {
-    //fetch all relievers
-    getAllRelievers: async (_: any, __: any, { userRole }) => {
-      try {
-        if (userRole !== 'MANAGER') {
-          throw ForbiddenError('You are not authorised.')
-        }
-        return await prisma.reliever.findMany({
-          include: {
-            jobs: true,
-          },
-        })
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+
 
     //get one center
     getOneCenter: async (_: any, { ECE_id }, { userRole }) => {
@@ -73,7 +59,7 @@ export const resolvers = {
     },
 
     //fetch one reliever
-    getOneReliever: async (_: any, { email }, { userRole }) => {
+    getOneReliever: async (_: any, { email }) => {
       try {
         return await prisma.reliever.findUnique({
           where: {
