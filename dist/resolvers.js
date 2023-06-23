@@ -13,13 +13,14 @@ export const resolvers = {
                 if (userRole === 'GUEST') {
                     throw ForbiddenError('You are not authorised.');
                 }
-                return await prisma.center.findUnique({
+                const center = await prisma.center.findUnique({
                     where: { ECE_id: ECE_id },
                     include: {
                         manager: true,
                         posts: true,
                     },
                 });
+                return center;
             }
             catch (error) {
                 console.log(error.message);
@@ -200,6 +201,7 @@ export const resolvers = {
             }
             catch (error) {
                 console.log(error.message);
+                throw new Error("This jobId is not found.");
             }
         },
     },
