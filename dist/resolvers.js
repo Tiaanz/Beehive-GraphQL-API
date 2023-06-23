@@ -1,6 +1,6 @@
 import { prisma } from './db.js';
 import bcrypt from 'bcrypt';
-import { createUserSchema, updateUserSchema, createPostSchema, updatePostSchema, } from './data-validation.js';
+import { createUserSchema, createPostSchema, updatePostSchema, } from './data-validation.js';
 import dayjs from 'dayjs';
 import jwt from 'jsonwebtoken';
 import { extractDatesFromDateRange } from './utils/helper.js';
@@ -136,64 +136,6 @@ export const resolvers = {
         },
     },
     Mutation: {
-        //create a reliever
-        addReliever: async (_, args) => {
-            try {
-                const validatedData = createUserSchema.parse(args);
-                const { first_name, last_name, phone, email, password } = validatedData;
-                const hashedPwd = await bcrypt.hash(password, 10);
-                const reliever = await prisma.reliever.create({
-                    data: {
-                        first_name,
-                        last_name,
-                        phone,
-                        email,
-                        password: hashedPwd,
-                        role: 'RELIEVER',
-                        qualified: args.qualified,
-                    },
-                });
-                const token = jwt.sign({ user_id: reliever.id, email: reliever.email }, process.env.TOKEN);
-                const relieverWithToken = await prisma.reliever.update({
-                    where: {
-                        id: reliever.id,
-                    },
-                    data: {
-                        token: token,
-                    },
-                });
-                return relieverWithToken;
-            }
-            catch (error) {
-                if (error.message.includes('Reliever_email_key')) {
-                    throw new Error('This email has been registered.');
-                }
-                console.log(error.message);
-            }
-        },
-        //update reliever
-        updateReliever: async (_, args, { userRole }) => {
-            try {
-                if (userRole !== 'RELIEVER') {
-                    throw ForbiddenError('You are not authorised.');
-                }
-                const validatedData = updateUserSchema.parse(args);
-                const { bio, email, photo_url } = validatedData;
-                const reliever = await prisma.reliever.update({
-                    where: { email: email },
-                    data: {
-                        bio: bio,
-                        photo_url: photo_url,
-                        qualified: args.qualified,
-                    },
-                });
-                return reliever;
-            }
-            catch (error) {
-                console.log(error.message);
-                throw new Error('Bio must contain at most 1000 characters.');
-            }
-        },
         //create a manager
         addManager: async (_, args) => {
             try {

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 export const createUserSchema = z.object({
-    first_name: z.string().max(40),
-    last_name: z.string().max(40),
+    first_name: z.string().min(1).max(40),
+    last_name: z.string().min(1).max(40),
     phone: z.string().min(8).max(11),
     email: z.string().email().max(40),
     password: z
@@ -14,7 +14,7 @@ export const createUserSchema = z.object({
 });
 export const updateUserSchema = z.object({
     email: z.string().email().max(40),
-    bio: z.string().max(1000).optional(),
+    bio: z.string().max(20).optional(),
     photo_url: z.string().optional(),
 });
 export const updateCenterSchema = z.object({
