@@ -5,7 +5,7 @@ import {
   updateCenterInput,
   addPostInput,
   updatePostInput,
-} from './model.js'
+} from './utils/model.js'
 import bcrypt from 'bcrypt'
 import {
   createUserSchema,
@@ -17,54 +17,14 @@ import {
 import dayjs from 'dayjs'
 import { Status } from '@prisma/client'
 import jwt from 'jsonwebtoken'
-import { extractDatesFromDateRange } from './helper.js'
+import { extractDatesFromDateRange } from './utils/helper.js'
 import { AuthenticationError, ForbiddenError } from './utils/errors.js'
-import { GraphQLError } from 'graphql';
+
 
 export const resolvers = {
   Query: {
 
-
-    //get one center
-    getOneCenter: async (_: any, { ECE_id }, { userRole }) => {
-      try {
-        if (userRole === 'GUEST') {
-          throw ForbiddenError('You are not authorised.')
-        }
-        const center= await prisma.center.findUnique({
-          where: { ECE_id: ECE_id },
-          include: {
-            manager: true,
-            posts: true,
-          },
-        })
-        if (!center) {
-          throw new GraphQLError("This centerId is not found", {
-           extensions:{code:'BAD_USER_INPUT'}
-         })
-       }
-        return center
-      } catch (error) {
-        console.log(error.message)
-      
-      }
-    },
-
-    //fetch filtered centers
-    getFilteredCenters: async (_: any, { input }) => {
-      try {
-        return await prisma.center.findMany({
-          where: {
-            name: {
-              contains: input,
-              mode: 'insensitive',
-            },
-          },
-        })
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+   
 
     //fetch one reliever
     getOneReliever: async (_: any, { email }) => {
@@ -303,28 +263,7 @@ export const resolvers = {
       }
     },
 
-    // update a center
-    updateCenter: async (_: any, args: updateCenterInput, { userRole }) => {
-      try {
-        if (userRole !== 'MANAGER') {
-          throw ForbiddenError('You are not authorised.')
-        }
-        const validatedData = updateCenterSchema.parse(args)
-        const { description, photo_url } = validatedData
-
-        const center = await prisma.center.update({
-          where: { ECE_id: args.ECE_id },
-          data: {
-            description,
-            photo_url,
-          },
-        })
-        return center
-      } catch (error) {
-        console.log(error.message)
-        throw new Error('Description must contain at most 1000 characters.')
-      }
-    },
+ 
 
     //create a manager
     addManager: async (_: any, args: addUserInput) => {

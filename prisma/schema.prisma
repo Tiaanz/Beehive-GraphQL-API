@@ -14,7 +14,7 @@ model Reliever {
   phone               String
   email               String   @unique
   password            String
-  token               String?
+  token               String?  @unique
   qualified           Boolean
   bio                 String?
   photo_url           String?
@@ -31,7 +31,7 @@ model Manager {
   phone      String
   email      String  @unique
   password   String
-  token      String?
+  token      String? @unique
   role       Role
   ECE_id     Int     @unique
   center     Center?

@@ -18,7 +18,7 @@ export const updateUserSchema = z.object({
     photo_url: z.string().optional(),
 });
 export const updateCenterSchema = z.object({
-    description: z.string().max(1000).optional(),
+    description: z.string().max(20).optional(),
     photo_url: z.string().optional(),
 });
 export const createPostSchema = z.object({

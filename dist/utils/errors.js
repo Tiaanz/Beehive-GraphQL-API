@@ -14,3 +14,10 @@ export const ForbiddenError = (errMessage) => {
         },
     });
 };
+export const InvalidInputError = (errMessage) => {
+    return new GraphQLError(errMessage, {
+        extensions: {
+            code: 'BAD_USER_INPUT',
+        },
+    });
+};

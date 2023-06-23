@@ -1,10 +1,13 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { typeDefs } from './schema.js';
-import { resolvers } from './resolvers.js';
 import { prisma } from './db.js';
+import { centreResolvers } from './resolvers/centreResolvers.js';
 import { config } from 'dotenv';
 config();
+const resolvers = {
+    ...centreResolvers
+};
 (async function () {
     const server = new ApolloServer({
         typeDefs,
@@ -15,11 +18,12 @@ config();
         /* add authentication to the api */
         context: async ({ req }) => {
             // Get the user token from the headers.
-            const token = req.headers.authorization;
-            const relieverRes = await prisma.reliever.findFirst({
+            const token = req.headers.authorization || "";
+            const relieverRes = await prisma.reliever.findUnique({
                 where: { token },
             });
-            const managerRes = await prisma.manager.findFirst({
+            console.log("token", token);
+            const managerRes = await prisma.manager.findUnique({
                 where: { token },
             });
             // Add the user to the context
