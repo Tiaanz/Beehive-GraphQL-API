@@ -26,40 +26,9 @@ export const resolvers = {
 
    
 
-    //fetch one reliever
-    getOneReliever: async (_: any, { email }) => {
-      try {
-        return await prisma.reliever.findUnique({
-          where: {
-            email: email,
-          },
-          include: {
-            jobs: true,
-          },
-        })
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+  
 
-    //fetch one reliever by ID
-    getRelieverById: async (_: any, { reliever_id }, { userRole }) => {
-      try {
-        if (userRole === 'GUEST') {
-          throw ForbiddenError('You are not authorised.')
-        }
-        return await prisma.reliever.findUnique({
-          where: {
-            id: reliever_id,
-          },
-          include: {
-            jobs: true,
-          },
-        })
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+   
 
     //fetch one manager
     getOneManager: async (_: any, { email }, { userRole }) => {

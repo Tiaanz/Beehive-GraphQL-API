@@ -4,11 +4,13 @@ import { typeDefs } from './schema.js'
 import { prisma } from './db.js'
 import { centreResolvers } from './resolvers/centreResolvers.js'
 import { config } from 'dotenv'
+import { relieverResolvers } from './resolvers/relieverResolver.js'
 
 config()
 
 const resolvers = {
   ...centreResolvers,
+  ...relieverResolvers
 }
 ;(async function () {
   const server = new ApolloServer({

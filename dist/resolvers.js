@@ -7,41 +7,6 @@ import { extractDatesFromDateRange } from './utils/helper.js';
 import { AuthenticationError, ForbiddenError } from './utils/errors.js';
 export const resolvers = {
     Query: {
-        //fetch one reliever
-        getOneReliever: async (_, { email }) => {
-            try {
-                return await prisma.reliever.findUnique({
-                    where: {
-                        email: email,
-                    },
-                    include: {
-                        jobs: true,
-                    },
-                });
-            }
-            catch (error) {
-                console.log(error.message);
-            }
-        },
-        //fetch one reliever by ID
-        getRelieverById: async (_, { reliever_id }, { userRole }) => {
-            try {
-                if (userRole === 'GUEST') {
-                    throw ForbiddenError('You are not authorised.');
-                }
-                return await prisma.reliever.findUnique({
-                    where: {
-                        id: reliever_id,
-                    },
-                    include: {
-                        jobs: true,
-                    },
-                });
-            }
-            catch (error) {
-                console.log(error.message);
-            }
-        },
         //fetch one manager
         getOneManager: async (_, { email }, { userRole }) => {
             try {

@@ -4,9 +4,11 @@ import { typeDefs } from './schema.js';
 import { prisma } from './db.js';
 import { centreResolvers } from './resolvers/centreResolvers.js';
 import { config } from 'dotenv';
+import { relieverResolvers } from './resolvers/relieverResolver.js';
 config();
 const resolvers = {
-    ...centreResolvers
+    ...centreResolvers,
+    ...relieverResolvers
 };
 (async function () {
     const server = new ApolloServer({
@@ -18,11 +20,10 @@ const resolvers = {
         /* add authentication to the api */
         context: async ({ req }) => {
             // Get the user token from the headers.
-            const token = req.headers.authorization || "";
+            const token = req.headers.authorization || '';
             const relieverRes = await prisma.reliever.findUnique({
                 where: { token },
             });
-            console.log("token", token);
             const managerRes = await prisma.manager.findUnique({
                 where: { token },
             });

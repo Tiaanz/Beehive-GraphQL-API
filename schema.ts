@@ -3,7 +3,7 @@ import { gql } from 'graphql-tag'
 export const typeDefs = gql`
   type Query {
     getFilteredCenters(input: String!): [Center!]!
-    getOneReliever(email: String!): Reliever
+    getRelieverByEmail(email: String!): Reliever
     getRelieverById(reliever_id: String!): Reliever
     getOneManager(email: String!): Manager
     getOneCenter(ECE_id: Int!): Center
