@@ -19,6 +19,7 @@ import { Status } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 import { extractDatesFromDateRange } from './helper.js'
 import { AuthenticationError, ForbiddenError } from './utils/errors.js'
+import { GraphQLError } from 'graphql';
 
 export const resolvers = {
   Query: {
@@ -37,7 +38,11 @@ export const resolvers = {
             posts: true,
           },
         })
-       
+        if (!center) {
+          throw new GraphQLError("This centerId is not found", {
+           extensions:{code:'BAD_USER_INPUT'}
+         })
+       }
         return center
       } catch (error) {
         console.log(error.message)
