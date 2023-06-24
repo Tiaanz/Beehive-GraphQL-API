@@ -20,7 +20,7 @@ export const typeDefs = gql `
       date_to: String!
     ): [Job]
     getOpenJobs: [Job]
-    getJobsByReliever(date_from: String!, date_to: String!): [Job]
+    getJobsByDate(date_from: String!, date_to: String!): [Job]
     getJobById(job_id: String!): Job
   }
 

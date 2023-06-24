@@ -7,6 +7,7 @@ import { config } from 'dotenv';
 import { relieverResolvers } from './resolvers/relieverResolver.js';
 import { managerResolvers } from './resolvers/managerResolvers.js';
 import { postResolvers } from './resolvers/postResolvers.js';
+import { jobResolvers } from './resolvers/jobResolvers.js';
 config();
 const resolvers = {
     Query: {
@@ -14,12 +15,14 @@ const resolvers = {
         ...relieverResolvers.Query,
         ...managerResolvers.Query,
         ...postResolvers.Query,
+        ...jobResolvers.Query
     },
     Mutation: {
         ...centreResolvers.Mutation,
         ...relieverResolvers.Mutation,
         ...managerResolvers.Mutation,
         ...postResolvers.Mutation,
+        ...jobResolvers.Mutation
     },
 };
 (async function () {

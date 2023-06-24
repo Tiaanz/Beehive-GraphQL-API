@@ -191,7 +191,6 @@ export const postResolvers = {
         if (error.message.includes('time')) {
           throw InvalidInputError('Invalid time input.')
         }
-        
       }
     },
 
@@ -206,8 +205,8 @@ export const postResolvers = {
         //check if the post exists
         const job = await prisma.job.findUnique({
           where: {
-            id:post_id
-          }
+            id: post_id,
+          },
         })
         if (!job) {
           throw InvalidInputError('This postId is invalid.')
@@ -235,7 +234,7 @@ export const postResolvers = {
           throw InvalidInputError('This postId is invalid.')
         }
         if (error.message.includes('status')) {
-          throw InvalidInputError("Invalid status input")
+          throw InvalidInputError('Invalid status input')
         }
         if (error.message.includes('time')) {
           throw InvalidInputError('Invalid time input.')

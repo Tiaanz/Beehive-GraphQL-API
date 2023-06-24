@@ -1,17 +1,13 @@
-import { prisma } from './db.js'
+import { prisma } from '../db.js'
+import { extractDatesFromDateRange } from '../utils/helper.js'
+import { ForbiddenError, InvalidInputError } from '../utils/errors.js'
 import dayjs from 'dayjs'
-import { extractDatesFromDateRange } from './utils/helper.js'
-import {ForbiddenError } from './utils/errors.js'
 
-
-export const resolvers = {
+export const jobResolvers = {
   Query: {
-
     //fetch "OPEN" jobs
     getOpenJobs: async (_: any, __: any, { userRole }) => {
       try {
-     
-        
         if (userRole === 'GUEST') {
           throw ForbiddenError('You are not authorised.')
         }
@@ -26,27 +22,49 @@ export const resolvers = {
         })
       } catch (error) {
         console.log(error.message)
+        if (error.message.includes('authorised')) {
+          throw ForbiddenError('You are not authorised.')
+        }
       }
     },
 
     //fetch jobs reliever applied
-    getJobsByReliever: async (_: any, { date_from, date_to }, { userRole }) => {
+    getJobsByDate: async (_: any, { date_from, date_to }, { userRole }) => {
       try {
         if (userRole !== 'RELIEVER') {
           throw ForbiddenError('You are not authorised.')
         }
-        return await prisma.job.findMany({
-          where: {
-            date_from: { lte: date_from },
-            date_to: { gte: date_to },
-          },
-          include: {
-            relievers: true,
-            center: true,
-          },
-        })
+        if (
+          !dayjs(date_from, 'YYYY/MM/DD', true).isValid() ||
+          !dayjs(date_to, 'YYYY/MM/DD', true).isValid()
+        ) {
+          throw InvalidInputError('Invalid dates input.')
+        }
+        if (new Date(date_from) <= new Date(date_to)) {
+          return await prisma.job.findMany({
+            where: {
+              date_from: { lte: date_from },
+              date_to: { gte: date_to },
+            },
+            include: {
+              relievers: true,
+              center: true,
+            },
+          })
+        } else {
+          throw InvalidInputError('date_from should equal date_to.')
+        }
       } catch (error) {
         console.log(error.message)
+        if (error.message.includes('authorised')) {
+          throw ForbiddenError('You are not authorised.')
+        }
+        if (error.message.includes('dates')) {
+          throw InvalidInputError('Invalid dates input.')
+        }
+        if (error.message.includes('date_from')) {
+          throw InvalidInputError('date_from should equal date_to.')
+        }
       }
     },
 
@@ -56,7 +74,7 @@ export const resolvers = {
         if (userRole === 'GUEST') {
           throw ForbiddenError('You are not authorised.')
         }
-        return await prisma.job.findUnique({
+        const job=await prisma.job.findUnique({
           where: {
             id: job_id,
           },
@@ -69,15 +87,27 @@ export const resolvers = {
             },
           },
         })
+        if (!job) {
+          throw InvalidInputError("This jobId is invalid.")
+        }
+        return job
       } catch (error) {
         console.log(error.message)
-        throw new Error("This jobId is not found.");
+        if (error.message.includes('authorised')) {
+          throw ForbiddenError('You are not authorised.')
+        }
+        if (error.message.includes('jobId')) {
+          throw ForbiddenError('This jobId is invalid.')
+        }
+        if (error.message.includes('prisma.job.findUnique()')) {
+          throw ForbiddenError('This jobId is invalid.')
+        }
+       
       }
     },
   },
 
   Mutation: {
-
     //update a Job by adding an applicant
     applyJob: async (_: any, { id, relieverID }, { userRole }) => {
       try {
@@ -285,8 +315,6 @@ export const resolvers = {
         console.log(error.message)
       }
     },
-
-   
 
     // update other jobs' relieverIDs when the reliever gets a job
     updateRelieverIDs: async (_: any, { relieverID, jobID }, { userRole }) => {
