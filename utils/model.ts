@@ -33,9 +33,6 @@ export interface addPostInput{
 
 export interface updatePostInput{
   post_id:string
-  date_from?: string
-  date_to?:string
   time?: string
-  qualified?: boolean
   status?:string
 }

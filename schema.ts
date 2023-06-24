@@ -60,10 +60,7 @@ export const typeDefs = gql`
     ): Job
     updatePost(
       post_id: String!
-      date_from: String
-      date_to: String
       time: String
-      qualified: Boolean
       status: String
     ): Job
     applyJob(id: String!, relieverID: String!): Job

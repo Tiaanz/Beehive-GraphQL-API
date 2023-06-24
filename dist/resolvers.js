@@ -1,38 +1,9 @@
 import { prisma } from './db.js';
-import bcrypt from 'bcrypt';
-import { createUserSchema, createPostSchema, updatePostSchema, } from './data-validation.js';
 import dayjs from 'dayjs';
-import jwt from 'jsonwebtoken';
 import { extractDatesFromDateRange } from './utils/helper.js';
 import { ForbiddenError } from './utils/errors.js';
 export const resolvers = {
     Query: {
-        //fetch posts by month
-        getPostsByMonth: async (_, { center_id, date_from, date_to }, { userRole }) => {
-            try {
-                if (userRole === 'GUEST') {
-                    throw ForbiddenError('You are not authorised.');
-                }
-                return await prisma.job.findMany({
-                    where: {
-                        center_id,
-                        date_from: { lte: date_to },
-                        date_to: { gte: date_from },
-                        OR: [
-                            { date_from: { gte: date_from } },
-                            { date_to: { lte: date_to } },
-                        ],
-                    },
-                    include: {
-                        relievers: true,
-                        center: true,
-                    },
-                });
-            }
-            catch (error) {
-                console.log(error.message);
-            }
-        },
         //fetch "OPEN" jobs
         getOpenJobs: async (_, __, { userRole }) => {
             try {
@@ -101,105 +72,6 @@ export const resolvers = {
         },
     },
     Mutation: {
-        //create a manager
-        addManager: async (_, args) => {
-            try {
-                const validatedData = createUserSchema.parse(args);
-                const { first_name, last_name, phone, email, password } = validatedData;
-                const hashedPwd = await bcrypt.hash(password, 10);
-                const manager = await prisma.manager.create({
-                    data: {
-                        first_name,
-                        last_name,
-                        phone,
-                        email,
-                        password: hashedPwd,
-                        role: 'MANAGER',
-                        ECE_id: args.ECE_id,
-                    },
-                });
-                const token = jwt.sign({ user_id: manager.id, email: manager.email }, process.env.TOKEN);
-                const managerWithToken = await prisma.manager.update({
-                    where: {
-                        id: manager.id,
-                    },
-                    data: {
-                        token: token,
-                    },
-                });
-                return managerWithToken;
-            }
-            catch (error) {
-                if (error.message.includes('Manager_email_key')) {
-                    throw new Error('This email has been registered.');
-                }
-                if (error.message.includes('Manager_ECE_id_key')) {
-                    throw new Error('This centre has a manager registered.');
-                }
-                console.log(error.message);
-            }
-        },
-        //add a post
-        addPost: async (_, args, { userRole }) => {
-            try {
-                if (userRole !== 'MANAGER') {
-                    throw ForbiddenError('You are not authorised.');
-                }
-                const validatedData = createPostSchema.parse(args);
-                const { date_from, date_to, time, qualified } = validatedData;
-                if (new Date(date_from) <= new Date(date_to)) {
-                    const post = await prisma.job.create({
-                        data: {
-                            center_id: args.center_id,
-                            date_from,
-                            date_to,
-                            time,
-                            qualified,
-                            status: 'OPEN',
-                        },
-                    });
-                    return post;
-                }
-                else {
-                    throw new Error('Date_from should be less than date_to.');
-                }
-            }
-            catch (error) {
-                console.log(error.message);
-            }
-        },
-        //update a post
-        updatePost: async (_, args, { userRole }) => {
-            try {
-                if (userRole !== 'MANAGER') {
-                    throw ForbiddenError('You are not authorised.');
-                }
-                const validatedData = updatePostSchema.parse(args);
-                const { date_from, date_to, time, qualified, post_id } = validatedData;
-                if (dayjs(date_from).isSame(date_to, 'day') ||
-                    dayjs(date_from).isBefore(date_to, 'day')) {
-                    const post = await prisma.job.update({
-                        where: {
-                            id: post_id,
-                        },
-                        data: {
-                            date_from,
-                            date_to,
-                            time,
-                            qualified,
-                            status: args.status,
-                        },
-                    });
-                    return post;
-                }
-                else {
-                    throw new Error('Date_from should be less than date_to.');
-                }
-            }
-            catch (error) {
-                console.log(error.message);
-            }
-        },
         //update a Job by adding an applicant
         applyJob: async (_, { id, relieverID }, { userRole }) => {
             try {

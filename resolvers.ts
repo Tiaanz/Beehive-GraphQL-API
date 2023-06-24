@@ -4,9 +4,8 @@ import {
   addPostInput,
   updatePostInput,
 } from './utils/model.js'
-import bcrypt from 'bcrypt'
+
 import {
-  createUserSchema,
   createPostSchema,
   updatePostSchema,
 } from './data-validation.js'
@@ -22,35 +21,7 @@ export const resolvers = {
  
  
 
-    //fetch posts by month
-    getPostsByMonth: async (
-      _: any,
-      { center_id, date_from, date_to },
-      { userRole }
-    ) => {
-      try {
-        if (userRole === 'GUEST') {
-          throw ForbiddenError('You are not authorised.')
-        }
-        return await prisma.job.findMany({
-          where: {
-            center_id,
-            date_from: { lte: date_to },
-            date_to: { gte: date_from },
-            OR: [
-              { date_from: { gte: date_from } },
-              { date_to: { lte: date_to } },
-            ],
-          },
-          include: {
-            relievers: true,
-            center: true,
-          },
-        })
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+ 
 
     //fetch "OPEN" jobs
     getOpenJobs: async (_: any, __: any, { userRole }) => {
@@ -130,67 +101,9 @@ export const resolvers = {
 
   
 
-    //add a post
-    addPost: async (_: any, args: addPostInput, { userRole }) => {
-      try {
-        
-        if (userRole !== 'MANAGER') {
-          throw ForbiddenError('You are not authorised.')
-        }
-        const validatedData = createPostSchema.parse(args)
-        const { date_from, date_to, time, qualified } = validatedData
-        if (new Date(date_from) <= new Date(date_to)) {
-          const post = await prisma.job.create({
-            data: {
-              center_id: args.center_id,
-              date_from,
-              date_to,
-              time,
-              qualified,
-              status: 'OPEN',
-            },
-          })
-          return post
-        } else {
-          throw new Error('Date_from should be less than date_to.')
-        }
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+  
 
-    //update a post
-    updatePost: async (_: any, args: updatePostInput, { userRole }) => {
-      try {
-        if (userRole !== 'MANAGER') {
-          throw ForbiddenError('You are not authorised.')
-        }
-        const validatedData = updatePostSchema.parse(args)
-        const { date_from, date_to, time, qualified, post_id } = validatedData
-        if (
-          dayjs(date_from).isSame(date_to, 'day') ||
-          dayjs(date_from).isBefore(date_to, 'day')
-        ) {
-          const post = await prisma.job.update({
-            where: {
-              id: post_id,
-            },
-            data: {
-              date_from,
-              date_to,
-              time,
-              qualified,
-              status: args.status as Status,
-            },
-          })
-          return post
-        } else {
-          throw new Error('Date_from should be less than date_to.')
-        }
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+  
 
     //update a Job by adding an applicant
     applyJob: async (_: any, { id, relieverID }, { userRole }) => {

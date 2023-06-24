@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
+dayjs.extend(customParseFormat);
 export function convertDate(date) {
     const year = date.slice(6);
     const month = date.slice(3, 5);
@@ -28,4 +30,9 @@ export function extractDatesFromDateRange(dateFrom, dateTo) {
         currentDate = currentDate.add(1, 'day');
     }
     return dates;
+}
+export function validateTime(timeString) {
+    const format = 'hh:mm A';
+    return (dayjs(timeString?.slice(0, 8), format, true).isValid() &&
+        dayjs(timeString?.slice(11), format, true).isValid());
 }
