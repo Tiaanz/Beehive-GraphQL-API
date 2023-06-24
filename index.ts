@@ -6,13 +6,15 @@ import { centreResolvers } from './resolvers/centreResolvers.js'
 import { config } from 'dotenv'
 import { relieverResolvers } from './resolvers/relieverResolver.js'
 import { managerResolvers } from './resolvers/managerResolvers.js'
+import { postResolvers } from './resolvers/postResolvers.js'
 
 config()
 
 const resolvers = {
   ...centreResolvers,
   ...relieverResolvers,
-  ...managerResolvers
+  ...managerResolvers,
+  ...postResolvers,
 }
 ;(async function () {
   const server = new ApolloServer({

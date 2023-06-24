@@ -4,31 +4,9 @@ import { createUserSchema, createPostSchema, updatePostSchema, } from './data-va
 import dayjs from 'dayjs';
 import jwt from 'jsonwebtoken';
 import { extractDatesFromDateRange } from './utils/helper.js';
-import { AuthenticationError, ForbiddenError } from './utils/errors.js';
+import { ForbiddenError } from './utils/errors.js';
 export const resolvers = {
     Query: {
-        //fetch posts by center
-        getPostsByCenter: async (_, { center_id, date_from, date_to }, { userRole }) => {
-            try {
-                if (userRole !== 'MANAGER') {
-                    throw AuthenticationError;
-                }
-                return await prisma.job.findMany({
-                    where: {
-                        center_id,
-                        date_from: { lte: date_from },
-                        date_to: { gte: date_to },
-                    },
-                    include: {
-                        relievers: true,
-                        center: true,
-                    },
-                });
-            }
-            catch (error) {
-                console.log(error.message);
-            }
-        },
         //fetch posts by month
         getPostsByMonth: async (_, { center_id, date_from, date_to }, { userRole }) => {
             try {

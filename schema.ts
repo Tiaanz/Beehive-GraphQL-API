@@ -9,8 +9,11 @@ export const typeDefs = gql`
     getOneCenter(ECE_id: Int!): Center
     getPostsByCenter(
       center_id: Int!
-      date_from: String
-      date_to: String
+    ): [Job]
+    getPostsByDate(
+      center_id: Int!
+      date_from: String!
+      date_to: String!
     ): [Job]
     getPostsByMonth(
       center_id: Int

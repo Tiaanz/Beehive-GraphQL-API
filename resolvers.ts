@@ -1,16 +1,12 @@
 import { prisma } from './db.js'
 import {
   addUserInput,
-  updateUserInput,
-  updateCenterInput,
   addPostInput,
   updatePostInput,
 } from './utils/model.js'
 import bcrypt from 'bcrypt'
 import {
   createUserSchema,
-  updateCenterSchema,
-  updateUserSchema,
   createPostSchema,
   updatePostSchema,
 } from './data-validation.js'
@@ -23,39 +19,8 @@ import { AuthenticationError, ForbiddenError } from './utils/errors.js'
 
 export const resolvers = {
   Query: {
-
-   
-
-  
-
-   
-
-    
-    //fetch posts by center
-    getPostsByCenter: async (
-      _: any,
-      { center_id, date_from, date_to },
-      { userRole }
-    ) => {
-      try {
-        if (userRole !== 'MANAGER') {
-          throw AuthenticationError
-        }
-        return await prisma.job.findMany({
-          where: {
-            center_id,
-            date_from: { lte: date_from },
-            date_to: { gte: date_to },
-          },
-          include: {
-            relievers: true,
-            center: true,
-          },
-        })
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+ 
+ 
 
     //fetch posts by month
     getPostsByMonth: async (
@@ -163,48 +128,7 @@ export const resolvers = {
 
  
 
-    //create a manager
-    addManager: async (_: any, args: addUserInput) => {
-      try {
-        const validatedData = createUserSchema.parse(args)
-        const { first_name, last_name, phone, email, password } = validatedData
-        const hashedPwd = await bcrypt.hash(password, 10)
-        const manager = await prisma.manager.create({
-          data: {
-            first_name,
-            last_name,
-            phone,
-            email,
-            password: hashedPwd,
-            role: 'MANAGER',
-            ECE_id: args.ECE_id,
-          },
-        })
-
-        const token = jwt.sign(
-          { user_id: manager.id, email: manager.email },
-          process.env.TOKEN
-        )
-        const managerWithToken = await prisma.manager.update({
-          where: {
-            id: manager.id,
-          },
-          data: {
-            token: token,
-          },
-        })
-
-        return managerWithToken
-      } catch (error) {
-        if (error.message.includes('Manager_email_key')) {
-          throw new Error('This email has been registered.')
-        }
-        if (error.message.includes('Manager_ECE_id_key')) {
-          throw new Error('This centre has a manager registered.')
-        }
-        console.log(error.message)
-      }
-    },
+  
 
     //add a post
     addPost: async (_: any, args: addPostInput, { userRole }) => {
