@@ -5,12 +5,14 @@ import { prisma } from './db.js'
 import { centreResolvers } from './resolvers/centreResolvers.js'
 import { config } from 'dotenv'
 import { relieverResolvers } from './resolvers/relieverResolver.js'
+import { managerResolvers } from './resolvers/managerResolvers.js'
 
 config()
 
 const resolvers = {
   ...centreResolvers,
-  ...relieverResolvers
+  ...relieverResolvers,
+  ...managerResolvers
 }
 ;(async function () {
   const server = new ApolloServer({

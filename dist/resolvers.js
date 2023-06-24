@@ -7,19 +7,6 @@ import { extractDatesFromDateRange } from './utils/helper.js';
 import { AuthenticationError, ForbiddenError } from './utils/errors.js';
 export const resolvers = {
     Query: {
-        //fetch one manager
-        getOneManager: async (_, { email }, { userRole }) => {
-            try {
-                return await prisma.manager.findUnique({
-                    where: {
-                        email: email,
-                    },
-                });
-            }
-            catch (error) {
-                console.log(error.message);
-            }
-        },
         //fetch posts by center
         getPostsByCenter: async (_, { center_id, date_from, date_to }, { userRole }) => {
             try {

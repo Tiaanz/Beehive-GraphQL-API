@@ -30,18 +30,7 @@ export const resolvers = {
 
    
 
-    //fetch one manager
-    getOneManager: async (_: any, { email }, { userRole }) => {
-      try {
-        return await prisma.manager.findUnique({
-          where: {
-            email: email,
-          },
-        })
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+    
     //fetch posts by center
     getPostsByCenter: async (
       _: any,

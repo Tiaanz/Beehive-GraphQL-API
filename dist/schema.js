@@ -4,7 +4,7 @@ export const typeDefs = gql `
     getFilteredCenters(input: String!): [Center!]!
     getRelieverByEmail(email: String!): Reliever
     getRelieverById(reliever_id: String!): Reliever
-    getOneManager(email: String!): Manager
+    getManagerByEmail(email: String!): Manager
     getOneCenter(ECE_id: Int!): Center
     getPostsByCenter(
       center_id: Int!
