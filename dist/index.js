@@ -9,10 +9,18 @@ import { managerResolvers } from './resolvers/managerResolvers.js';
 import { postResolvers } from './resolvers/postResolvers.js';
 config();
 const resolvers = {
-    ...centreResolvers,
-    ...relieverResolvers,
-    ...managerResolvers,
-    ...postResolvers,
+    Query: {
+        ...centreResolvers.Query,
+        ...relieverResolvers.Query,
+        ...managerResolvers.Query,
+        ...postResolvers.Query,
+    },
+    Mutation: {
+        ...centreResolvers.Mutation,
+        ...relieverResolvers.Mutation,
+        ...managerResolvers.Mutation,
+        ...postResolvers.Mutation,
+    },
 };
 (async function () {
     const server = new ApolloServer({

@@ -1,27 +1,11 @@
 import { prisma } from './db.js'
-import {
-  addUserInput,
-  addPostInput,
-  updatePostInput,
-} from './utils/model.js'
-
-import {
-  createPostSchema,
-  updatePostSchema,
-} from './data-validation.js'
 import dayjs from 'dayjs'
-import { Status } from '@prisma/client'
-import jwt from 'jsonwebtoken'
 import { extractDatesFromDateRange } from './utils/helper.js'
-import { AuthenticationError, ForbiddenError } from './utils/errors.js'
+import {ForbiddenError } from './utils/errors.js'
 
 
 export const resolvers = {
   Query: {
- 
- 
-
- 
 
     //fetch "OPEN" jobs
     getOpenJobs: async (_: any, __: any, { userRole }) => {
@@ -93,17 +77,6 @@ export const resolvers = {
   },
 
   Mutation: {
- 
-
-
-
- 
-
-  
-
-  
-
-  
 
     //update a Job by adding an applicant
     applyJob: async (_: any, { id, relieverID }, { userRole }) => {
@@ -313,66 +286,7 @@ export const resolvers = {
       }
     },
 
-    //update reliever's unavailable dates when job is cancelled
-    updateUnavailableDates: async (
-      _: any,
-      { relieverID, jobID },
-      { userRole }
-    ) => {
-      try {
-        if (userRole !== 'MANAGER') {
-          throw ForbiddenError('You are not authorised.')
-        }
-        const job = await prisma.job.findUnique({
-          where: {
-            id: jobID,
-          },
-          select: {
-            date_from: true,
-            date_to: true,
-          },
-        })
-
-        const cancelledDates = []
-        const dateFromObj = dayjs(job.date_from)
-        const dateToObj = dayjs(job.date_to)
-
-        let currentDate = dateFromObj
-        while (
-          currentDate.isSame(dateToObj) ||
-          currentDate.isBefore(dateToObj)
-        ) {
-          cancelledDates.push(currentDate.format('YYYY/MM/DD'))
-          currentDate = currentDate.add(1, 'day')
-        }
-
-        const reliever = await prisma.reliever.findUnique({
-          where: {
-            id: relieverID,
-          },
-          select: {
-            not_available_dates: true,
-          },
-        })
-
-        const updated_not_available_dates = reliever.not_available_dates.filter(
-          (date) =>
-            !cancelledDates.find((cancelledDate) => cancelledDate === date)
-        )
-
-        const updatedReliever = await prisma.reliever.update({
-          where: {
-            id: relieverID,
-          },
-          data: {
-            not_available_dates: updated_not_available_dates,
-          },
-        })
-        return updatedReliever
-      } catch (error) {
-        console.log(error.message)
-      }
-    },
+   
 
     // update other jobs' relieverIDs when the reliever gets a job
     updateRelieverIDs: async (_: any, { relieverID, jobID }, { userRole }) => {

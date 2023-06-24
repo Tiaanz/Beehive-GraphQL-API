@@ -3,6 +3,7 @@ import { prisma } from '../db.js';
 import { ForbiddenError, InvalidInputError } from '../utils/errors.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import dayjs from 'dayjs';
 export const relieverResolvers = {
     Query: {
         //fetch one reliever
@@ -118,8 +119,71 @@ export const relieverResolvers = {
                 if (error.message.includes('email')) {
                     throw InvalidInputError('The email is invalid.');
                 }
-                if (error.message.includes("too_big")) {
-                    throw InvalidInputError("Bio must contain at most 1000 characters.");
+                if (error.message.includes('too_big')) {
+                    throw InvalidInputError('Bio must contain at most 1000 characters.');
+                }
+            }
+        },
+        //update reliever's unavailable dates when job is cancelled
+        updateUnavailableDates: async (_, { relieverID, jobID }, { userRole }) => {
+            try {
+                if (userRole !== 'MANAGER') {
+                    throw ForbiddenError('You are not authorised.');
+                }
+                const job = await prisma.job.findUnique({
+                    where: {
+                        id: jobID,
+                    },
+                    select: {
+                        date_from: true,
+                        date_to: true,
+                    },
+                });
+                if (!job) {
+                    throw InvalidInputError('The jobId is invalid.');
+                }
+                const cancelledDates = [];
+                const dateFromObj = dayjs(job.date_from);
+                const dateToObj = dayjs(job.date_to);
+                let currentDate = dateFromObj;
+                while (currentDate.isSame(dateToObj) ||
+                    currentDate.isBefore(dateToObj)) {
+                    cancelledDates.push(currentDate.format('YYYY/MM/DD'));
+                    currentDate = currentDate.add(1, 'day');
+                }
+                const reliever = await prisma.reliever.findUnique({
+                    where: {
+                        id: relieverID,
+                    },
+                    select: {
+                        not_available_dates: true,
+                    },
+                });
+                if (!reliever) {
+                    throw InvalidInputError('The relieverId is invalid.');
+                }
+                const updated_not_available_dates = reliever.not_available_dates.filter((date) => !cancelledDates.find((cancelledDate) => cancelledDate === date));
+                const updatedReliever = await prisma.reliever.update({
+                    where: {
+                        id: relieverID,
+                    },
+                    data: {
+                        not_available_dates: updated_not_available_dates,
+                    },
+                });
+                return updatedReliever;
+            }
+            catch (error) {
+                console.log(error.message);
+                if (error.message.includes('authorised')) {
+                    throw ForbiddenError('You are not authorised.');
+                }
+                if (error.message.includes('jobId') ||
+                    error.message.includes('prisma.job.findUnique()')) {
+                    throw InvalidInputError('The jobId is invalid.');
+                }
+                if (error.message.includes('relieverId') || error.message.includes('prisma.reliever.findUnique()')) {
+                    throw InvalidInputError('The relieverId is invalid.');
                 }
             }
         },

@@ -5,6 +5,7 @@ export const centreResolvers = {
     Query: {
         getOneCenter: async (_, { ECE_id }, { userRole }) => {
             try {
+                console.log(userRole);
                 if (userRole === 'GUEST') {
                     throw ForbiddenError('You are not authorised.');
                 }
