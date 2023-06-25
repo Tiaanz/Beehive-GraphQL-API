@@ -62,8 +62,8 @@ export const typeDefs = gql `
       time: String
       status: String
     ): Job
-    applyJob(id: String!, relieverID: String!): Job
-    declineJob(id: String!, relieverID: String!): Job
+    applyJob(jobID: String!, relieverID: String!): Job
+    declineJob(jobID: String!, relieverID: String!): Job
     acceptJob(id: String!, relieverID: String!): Job
     getJob(id: String!, jobID: String!): Reliever
     updateUnavailableDates(relieverID: String!, jobID: String!): Reliever
