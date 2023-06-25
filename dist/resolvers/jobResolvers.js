@@ -95,10 +95,8 @@ export const jobResolvers = {
                 if (error.message.includes('authorised')) {
                     throw ForbiddenError('You are not authorised.');
                 }
-                if (error.message.includes('jobId')) {
-                    throw ForbiddenError('This jobId is invalid.');
-                }
-                if (error.message.includes('prisma.job.findUnique()')) {
+                if (error.message.includes('jobId') ||
+                    error.message.includes('prisma.job.findUnique()')) {
                     throw ForbiddenError('This jobId is invalid.');
                 }
             }
@@ -166,16 +164,12 @@ export const jobResolvers = {
                 if (error.message.includes('You have applied or declined the job.')) {
                     throw InvalidInputError('You have applied or declined the job.');
                 }
-                if (error.message.includes('prisma.job.findUnique()')) {
+                if (error.message.includes('prisma.job.findUnique()') ||
+                    error.message.includes('jobId')) {
                     throw InvalidInputError('This jobId is invalid.');
                 }
-                if (error.message.includes('jobId')) {
-                    throw InvalidInputError('This jobId is invalid.');
-                }
-                if (error.message.includes('relieverId')) {
-                    throw InvalidInputError('This relieverId is invalid.');
-                }
-                if (error.message.includes('prisma.reliever.findUnique()')) {
+                if (error.message.includes('relieverId') ||
+                    error.message.includes('prisma.reliever.findUnique()')) {
                     throw InvalidInputError('This relieverId is invalid.');
                 }
             }
@@ -241,29 +235,33 @@ export const jobResolvers = {
                 if (error.message.includes('You have declined or applied the job.')) {
                     throw InvalidInputError('You have applied or declined the job.');
                 }
-                if (error.message.includes('prisma.job.findUnique()')) {
+                if (error.message.includes('prisma.job.findUnique()') ||
+                    error.message.includes('jobId')) {
                     throw InvalidInputError('This jobId is invalid.');
                 }
-                if (error.message.includes('jobId')) {
-                    throw InvalidInputError('This jobId is invalid.');
-                }
-                if (error.message.includes('relieverId')) {
-                    throw InvalidInputError('This relieverId is invalid.');
-                }
-                if (error.message.includes('prisma.reliever.findUnique()')) {
+                if (error.message.includes('relieverId') ||
+                    error.message.includes('prisma.reliever.findUnique()')) {
                     throw InvalidInputError('This relieverId is invalid.');
                 }
             }
         },
-        //When a manager accpets a job
-        acceptJob: async (_, { id, relieverID }, { userRole }) => {
+        //When a manager accpets a job (update the status of the job and relieverIDs)
+        acceptJob: async (_, { jobID, relieverID }, { userRole }) => {
             try {
                 if (userRole !== 'MANAGER') {
                     throw ForbiddenError('You are not authorised.');
                 }
+                const reliever = await prisma.reliever.findUnique({
+                    where: {
+                        id: relieverID,
+                    },
+                });
+                if (!reliever) {
+                    throw InvalidInputError('The relieverId is invalid.');
+                }
                 const declined = await prisma.job.findUnique({
                     where: {
-                        id: id,
+                        id: jobID,
                     },
                     select: {
                         declined_relieverIDs: true,
@@ -271,19 +269,22 @@ export const jobResolvers = {
                 });
                 const applied = await prisma.job.findUnique({
                     where: {
-                        id: id,
+                        id: jobID,
                     },
                     select: {
                         relieverIDs: true,
                     },
                 });
+                if (!applied || !declined) {
+                    throw InvalidInputError('The jobId is invalid.');
+                }
                 //Make sure the reliever have applied the job and have not declined it
                 if (applied &&
                     !declined.declined_relieverIDs.includes(relieverID) &&
                     applied.relieverIDs.includes(relieverID)) {
                     const updatedJob = await prisma.job.update({
                         where: {
-                            id: id,
+                            id: jobID,
                         },
                         data: {
                             relieverIDs: relieverID,
@@ -293,32 +294,61 @@ export const jobResolvers = {
                     return updatedJob;
                 }
                 else {
-                    throw new Error('You have not applied for this job.');
+                    throw InvalidInputError('You have not applied for this job.');
                 }
             }
             catch (error) {
                 console.log(error.message);
+                if (error.message.includes('authorised')) {
+                    throw ForbiddenError('You are not authorised.');
+                }
+                if (error.message.includes('relieverId') ||
+                    error.message.includes('prisma.reliever.findUnique()')) {
+                    throw InvalidInputError('This relieverId is invalid.');
+                }
+                if (error.message.includes('prisma.job.findUnique()') ||
+                    error.message.includes('jobId')) {
+                    throw InvalidInputError('This jobId is invalid.');
+                }
+                if (error.message.includes('You have not applied for this job.')) {
+                    throw InvalidInputError("You have not applied for this job.");
+                }
             }
         },
-        //When a reliever gets a job
-        getJob: async (_, { id, jobID }, { userRole }) => {
+        //When a reliever gets a job(update reliever's jobIDs, and not_available_dates)
+        getJob: async (_, { relieverID, jobID }, { userRole }) => {
             try {
                 if (userRole !== 'MANAGER') {
                     throw ForbiddenError('You are not authorised.');
                 }
                 const existing = await prisma.reliever.findUnique({
                     where: {
-                        id: id,
+                        id: relieverID,
                     },
                     select: {
                         jobIDs: true,
                     },
                 });
+                if (!existing) {
+                    throw InvalidInputError("The relieverId is invalid.");
+                }
+                const job = await prisma.job.findUnique({
+                    where: {
+                        id: jobID,
+                    },
+                    select: {
+                        date_from: true,
+                        date_to: true,
+                    },
+                });
+                if (!job) {
+                    throw InvalidInputError("The jobId is invalid.");
+                }
                 //To avoid duplicated jobID being added
                 if (existing && !existing.jobIDs.includes(jobID)) {
                     const updatedReliever = await prisma.reliever.update({
                         where: {
-                            id: id,
+                            id: relieverID,
                         },
                         data: {
                             jobIDs: {
@@ -326,20 +356,11 @@ export const jobResolvers = {
                             },
                         },
                     });
-                    const job = await prisma.job.findUnique({
-                        where: {
-                            id: jobID,
-                        },
-                        select: {
-                            date_from: true,
-                            date_to: true,
-                        },
-                    });
                     const unavailableDates = extractDatesFromDateRange(job.date_from, job.date_to);
                     //set unavailable dates
                     const updatedReliever2 = await prisma.reliever.update({
                         where: {
-                            id: id,
+                            id: relieverID,
                         },
                         data: {
                             not_available_dates: unavailableDates,
@@ -348,14 +369,28 @@ export const jobResolvers = {
                     return updatedReliever2;
                 }
                 else {
-                    throw new Error('You have been confirmed for this job.');
+                    throw InvalidInputError('You have been confirmed for this job.');
                 }
             }
             catch (error) {
                 console.log(error.message);
+                if (error.message.includes('authorised')) {
+                    throw ForbiddenError('You are not authorised.');
+                }
+                if (error.message.includes('relieverId') ||
+                    error.message.includes('prisma.reliever.findUnique()')) {
+                    throw InvalidInputError('This relieverId is invalid.');
+                }
+                if (error.message.includes('prisma.job.findUnique()') ||
+                    error.message.includes('jobId')) {
+                    throw InvalidInputError('This jobId is invalid.');
+                }
+                if (error.message.includes('confirmed')) {
+                    throw InvalidInputError("You have been confirmed for this job.");
+                }
             }
         },
-        // update other jobs' relieverIDs when the reliever gets a job
+        // update other jobs' relieverIDs when the reliever gets a job(remove the reliever from other job applications)
         updateRelieverIDs: async (_, { relieverID, jobID }, { userRole }) => {
             try {
                 if (userRole !== 'MANAGER') {
@@ -366,6 +401,17 @@ export const jobResolvers = {
                         id: jobID,
                     },
                 });
+                if (!job) {
+                    throw InvalidInputError("The jobId is invalid.");
+                }
+                const reliever = await prisma.reliever.findUnique({
+                    where: {
+                        id: relieverID,
+                    },
+                });
+                if (!reliever) {
+                    throw InvalidInputError('The relieverId is invalid.');
+                }
                 const filteredPosts = await prisma.job.findMany({
                     where: {
                         id: {
@@ -404,6 +450,17 @@ export const jobResolvers = {
             }
             catch (error) {
                 console.log(error.message);
+                if (error.message.includes('authorised')) {
+                    throw ForbiddenError('You are not authorised.');
+                }
+                if (error.message.includes('prisma.job.findUnique()') ||
+                    error.message.includes('jobId')) {
+                    throw InvalidInputError('This jobId is invalid.');
+                }
+                if (error.message.includes('relieverId') ||
+                    error.message.includes('prisma.reliever.findUnique()')) {
+                    throw InvalidInputError('This relieverId is invalid.');
+                }
             }
         },
     },
