@@ -15,14 +15,14 @@ const resolvers = {
         ...relieverResolvers.Query,
         ...managerResolvers.Query,
         ...postResolvers.Query,
-        ...jobResolvers.Query
+        ...jobResolvers.Query,
     },
     Mutation: {
         ...centreResolvers.Mutation,
         ...relieverResolvers.Mutation,
         ...managerResolvers.Mutation,
         ...postResolvers.Mutation,
-        ...jobResolvers.Mutation
+        ...jobResolvers.Mutation,
     },
 };
 (async function () {

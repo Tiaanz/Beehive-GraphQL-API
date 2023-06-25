@@ -16,12 +16,12 @@ export const createUserSchema = z.object({
 
 export const updateUserSchema = z.object({
   email: z.string().email().max(40),
-  bio: z.string().max(20).optional(),
+  bio: z.string().max(1000).optional(),
   photo_url: z.string().optional(),
 })
 
 export const updateCenterSchema = z.object({
-  description: z.string().max(20).optional(),
+  description: z.string().max(1000).optional(),
   photo_url: z.string().optional(),
 })
 

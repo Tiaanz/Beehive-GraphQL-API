@@ -101,17 +101,16 @@ export const postResolvers = {
         if (userRole === 'GUEST') {
           throw ForbiddenError('You are not authorised.')
         }
-
-        const center = await prisma.center.findUnique({
-          where: { ECE_id: center_id },
-        })
-        if (!center) {
-          throw InvalidInputError('This centerId is invalid.')
+        if (center_id) {
+          const center = await prisma.center.findUnique({
+            where: { ECE_id: center_id },
+          })
+          if (!center) {
+            throw InvalidInputError('This centerId is invalid.')
+          }
         }
-        if (
-          !dayjs(date_from, 'YYYY/MM/DD', true).isValid() ||
-          !dayjs(date_to, 'YYYY/MM/DD', true).isValid()
-        ) {
+
+        if (!dayjs(date_from, 'YYYY/MM/DD', true).isValid()) {
           throw InvalidInputError('Invalid dates input.')
         }
         return await prisma.job.findMany({
@@ -211,20 +210,32 @@ export const postResolvers = {
         if (!job) {
           throw InvalidInputError('This postId is invalid.')
         }
-        if (!validateTime(time)) {
-          throw InvalidInputError('Invalid time input.')
-        }
 
-        const post = await prisma.job.update({
-          where: {
-            id: post_id,
-          },
-          data: {
-            time,
-            status: args.status as Status,
-          },
-        })
-        return post
+        if (time) {
+          if (!validateTime(time)) {
+            throw InvalidInputError('Invalid time input')
+          }
+          const post = await prisma.job.update({
+            where: {
+              id: post_id,
+            },
+            data: {
+              time,
+              status: args.status as Status,
+            },
+          })
+          return post
+        } else {
+          const post = await prisma.job.update({
+            where: {
+              id: post_id,
+            },
+            data: {
+              status: args.status as Status,
+            },
+          })
+          return post
+        }
       } catch (error) {
         console.log(error.message)
         if (error.message.includes('authorised')) {
