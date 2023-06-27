@@ -99,7 +99,7 @@ app.use(
   '/',
   cors<cors.CorsRequest>({
     origin: [
-      'https://beehive-nextjs.vercel.app/',
+      'https://beehive-nextjs.vercel.app',
       'https://studio.apollographql.com',
     ],
   }),
