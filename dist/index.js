@@ -1,5 +1,4 @@
 import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
 import { typeDefs } from './schema.js';
 import { prisma } from './db.js';
 import { centreResolvers } from './resolvers/centreResolvers.js';
@@ -25,35 +24,89 @@ const resolvers = {
         ...jobResolvers.Mutation,
     },
 };
-(async function () {
-    const server = new ApolloServer({
-        typeDefs,
-        resolvers,
-        introspection: true,
-    });
-    const { url } = await startStandaloneServer(server, {
-        /* add authentication to the api */
-        context: async ({ req }) => {
-            // Get the user token from the headers.
-            const token = req.headers.authorization || '';
-            const relieverRes = await prisma.reliever.findUnique({
-                where: { token },
-            });
-            const managerRes = await prisma.manager.findUnique({
-                where: { token },
-            });
-            // Add the user to the context
-            if (relieverRes) {
-                return { userId: relieverRes.id, userRole: relieverRes.role };
-            }
-            else if (managerRes) {
-                return { userId: managerRes.id, userRole: managerRes.role };
-            }
-            else {
-                return { userId: 100001, userRole: 'GUEST' };
-            }
-        },
-        listen: { port: process.env.PORT ? parseInt(process.env.PORT, 10) : 4000 },
-    });
-    console.log('server is ready at' + ' ' + url);
-})();
+// ;(async function () {
+//   const server = new ApolloServer({
+//     typeDefs,
+//     resolvers,
+//     introspection: true,
+//   })
+//   const { url } = await startStandaloneServer(server, {
+//     /* add authentication to the api */
+//     context: async ({ req }) => {
+//       // Get the user token from the headers.
+//       const token = req.headers.authorization || ''
+//       const relieverRes = await prisma.reliever.findUnique({
+//         where: { token },
+//       })
+//       const managerRes = await prisma.manager.findUnique({
+//         where: { token },
+//       })
+//       // Add the user to the context
+//       if (relieverRes) {
+//         return { userId: relieverRes.id, userRole: relieverRes.role }
+//       } else if (managerRes) {
+//         return { userId: managerRes.id, userRole: managerRes.role }
+//       } else {
+//         return { userId: 100001, userRole: 'GUEST' }
+//       }
+//     },
+//     listen: { port: process.env.PORT ? parseInt(process.env.PORT, 10) : 4000 },
+//   })
+//   console.log('server is ready at' + ' ' + url)
+// })()
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+// Required logic for integrating with Express
+const app = express();
+// Our httpServer handles incoming requests to our Express app.
+// Below, we tell Apollo Server to "drain" this httpServer,
+// enabling our servers to shut down gracefully.
+const httpServer = http.createServer(app);
+// Same ApolloServer initialization as before, plus the drain plugin
+// for our httpServer.
+const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+});
+// Ensure we wait for our server to start
+await server.start();
+// Set up our Express middleware to handle CORS, body parsing,
+// and our expressMiddleware function.
+app.use('/', cors({
+    origin: [
+        'https://beehive-nextjs.vercel.app/',
+        'https://studio.apollographql.com',
+    ],
+}), bodyParser.json(), 
+// expressMiddleware accepts the same arguments:
+// an Apollo Server instance and optional configuration options
+expressMiddleware(server, {
+    context: async ({ req }) => {
+        // Get the user token from the headers.
+        const token = req.headers.authorization || '';
+        const relieverRes = await prisma.reliever.findUnique({
+            where: { token },
+        });
+        const managerRes = await prisma.manager.findUnique({
+            where: { token },
+        });
+        // Add the user to the context
+        if (relieverRes) {
+            return { userId: relieverRes.id, userRole: relieverRes.role };
+        }
+        else if (managerRes) {
+            return { userId: managerRes.id, userRole: managerRes.role };
+        }
+        else {
+            return { userId: 100001, userRole: 'GUEST' };
+        }
+    },
+}));
+// Modified server startup
+await new Promise((resolve) => httpServer.listen({ port: process.env.PORT ? parseInt(process.env.PORT, 10) : 4000 }, resolve));
+console.log(`🚀 Server ready at http://localhost:4000/`);
