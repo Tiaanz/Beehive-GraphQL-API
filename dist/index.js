@@ -7,6 +7,12 @@ import { relieverResolvers } from './resolvers/relieverResolver.js';
 import { managerResolvers } from './resolvers/managerResolvers.js';
 import { postResolvers } from './resolvers/postResolvers.js';
 import { jobResolvers } from './resolvers/jobResolvers.js';
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import bodyParser from 'body-parser';
 config();
 const resolvers = {
     Query: {
@@ -24,42 +30,6 @@ const resolvers = {
         ...jobResolvers.Mutation,
     },
 };
-// ;(async function () {
-//   const server = new ApolloServer({
-//     typeDefs,
-//     resolvers,
-//     introspection: true,
-//   })
-//   const { url } = await startStandaloneServer(server, {
-//     /* add authentication to the api */
-//     context: async ({ req }) => {
-//       // Get the user token from the headers.
-//       const token = req.headers.authorization || ''
-//       const relieverRes = await prisma.reliever.findUnique({
-//         where: { token },
-//       })
-//       const managerRes = await prisma.manager.findUnique({
-//         where: { token },
-//       })
-//       // Add the user to the context
-//       if (relieverRes) {
-//         return { userId: relieverRes.id, userRole: relieverRes.role }
-//       } else if (managerRes) {
-//         return { userId: managerRes.id, userRole: managerRes.role }
-//       } else {
-//         return { userId: 100001, userRole: 'GUEST' }
-//       }
-//     },
-//     listen: { port: process.env.PORT ? parseInt(process.env.PORT, 10) : 4000 },
-//   })
-//   console.log('server is ready at' + ' ' + url)
-// })()
-import { expressMiddleware } from '@apollo/server/express4';
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import express from 'express';
-import http from 'http';
-import cors from 'cors';
-import bodyParser from 'body-parser';
 // Required logic for integrating with Express
 const app = express();
 // Our httpServer handles incoming requests to our Express app.
@@ -80,7 +50,7 @@ await server.start();
 // and our expressMiddleware function.
 app.use('/', cors({
     origin: [
-        'https://beehive-nextjs.vercel.app/',
+        'https://beehive-nextjs.vercel.app',
         'https://studio.apollographql.com',
     ],
 }), bodyParser.json(), 

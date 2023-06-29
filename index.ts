@@ -62,6 +62,7 @@ app.use(
   cors<cors.CorsRequest>({
     origin: [
       'https://beehive-nextjs.vercel.app',
+      'http://localhost:3000',
       'https://studio.apollographql.com',
     ],
   }),
